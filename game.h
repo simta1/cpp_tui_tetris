@@ -15,9 +15,13 @@ using namespace std;
 // ms 기준
 const int sleepTime = 10;
 const int dropTime = 500;
-const int hardDropAnimationTime = 30;
+const int hardDropAnimationTime = 150;
 const int breakRowAnimationTime = 70;
 const int breakRowVibrationPeriod = breakRowAnimationTime / 2;
+
+//
+const double HARDDROP_EFFECT_VELOCITY = 1.5;
+const int HARDDROP_EFFECT_INSENSITIVITY = 3;
 
 template <int ROWS, int COLS>
 class Game {
@@ -44,6 +48,9 @@ private:
     Timer timer_hardDropped;
     Timer timer_breakRow;
 
+    int prevHardDropHeight;
+    int prevHardDropPosX;
+
     vector<int> fullRows;
 
     // 추가 정보
@@ -54,7 +61,12 @@ private:
     bool gameover;
 
     void hardDrop() {
-        while (checkFallingBlockCanDrop()) fallingBlock.drop();
+        prevHardDropHeight = 0;
+        while (checkFallingBlockCanDrop()) {
+            fallingBlock.drop();
+            ++prevHardDropHeight;
+        }
+        prevHardDropPosX = fallingBlock.getX();
 
         // hard drop 후에는 바로 put되도록 타이머 조정
         timer_drop.end();
@@ -184,15 +196,21 @@ private:
 
     void drawMargin() {
         lazyPrinter.setColor(ConsoleColor::ORIGINALBG);
-        // lazyPrinter.rect(0, 0, (MARGIN_WIDTH + COLS + 2) * LEN, (MARGIN_HEIGHT + ROWS + 2) * LEN);
         lazyPrinter.rect(MARGIN_WIDTH * LEN, 0, (COLS + 2) * LEN, MARGIN_HEIGHT * LEN);
         lazyPrinter.rect(0, MARGIN_HEIGHT * LEN, MARGIN_WIDTH * LEN, (ROWS + 2) * LEN);
     }
 
+    int getTaxiDist(int x1, int y1, int x2, int y2) {
+        return abs(x1 - x2) + abs(y1 - y2);
+    }
+
     void drawBorder() {
-        lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT, ConsoleColor::BORDER_DEFAULT);
-        // if (!timer_hardDropped.isOver()) lazyPrinter.setColor(ConsoleColor::WHITE, ConsoleColor::WHITE);
-        for (auto [i, j] : borderPos) drawGrid(i, j);
+        bool hardDropped = !timer_hardDropped.isOver();
+        for (auto [x, y] : borderPos) {
+            if (hardDropped && getTaxiDist(prevHardDropPosX, ROWS + 1, x, y) < min(int(timer_hardDropped.getTime() * HARDDROP_EFFECT_VELOCITY), prevHardDropHeight / HARDDROP_EFFECT_INSENSITIVITY)) lazyPrinter.setColor(ConsoleColor::WHITE, ConsoleColor::WHITE);
+            else lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT, ConsoleColor::BORDER_DEFAULT);
+            drawGrid(x, y);
+        }
     }
 
     void drawBoard() {
@@ -252,9 +270,10 @@ private:
     }
 
     void display() {
-        // harddrop 진동효과
+        // harddrop 진동효과 (세로)
         // if (!timer_hardDropped.isOver()) lazyPrinter.translate(0, HARDDROP_VIBRATION_LEN);
 
+        // breakRow 진동효과 (가로)
         if (haveFullRow()) {
             int sign = 1 - 2 * (timer_breakRow.getTime() / (breakRowVibrationPeriod / sleepTime) % 2);
             lazyPrinter.translate(sign * BREAKROW_VIBRATION_LEN, 0);

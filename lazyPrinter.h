@@ -105,6 +105,8 @@ public:
                 if (prevConsole[x][y] != console[x][y]) {
                     printOnConsole(x, y, console[x][y].color, console[x][y].ch);
                     prevConsole[x][y] = console[x][y];
+                    
+                    // TODO 제대로 초기화안되는것 같음 확인해볼 필요있음
                     console[x][y] = Data{PIXEL_CHAR, convertColorToInt(ConsoleColor::ORIGINALBG)};
                 }
             }
