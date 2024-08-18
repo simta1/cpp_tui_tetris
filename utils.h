@@ -9,6 +9,7 @@ const char PIXEL_CHAR = 'X';
 const int PIXEL_WIDTH = 2;
 const int PIXEL_HEIGHT = 1;
 
+// https://learn.microsoft.com/ko-kr/dotnet/api/system.consolecolor?view=net-8.0
 enum class ConsoleColor {
     BLACK,
     DARKBLUE,
@@ -26,7 +27,6 @@ enum class ConsoleColor {
     MAGENTA,
     YELLOW,
     WHITE,
-    LIGHTGRAY = 7,
     ORIGINALBG = 0
 };
 
