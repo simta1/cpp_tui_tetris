@@ -1,3 +1,6 @@
+#ifndef COORDINATE_H
+#define COORDINATE_H
+
 enum class Direction {
     COUNTERCLOCKWISE,
     CLOCKWISE
@@ -31,3 +34,5 @@ struct Coordinate {
         }
     }
 };
+
+#endif

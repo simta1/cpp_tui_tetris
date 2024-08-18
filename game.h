@@ -1,3 +1,6 @@
+#ifndef GAME_H
+#define GAME_H
+
 #include <bits/stdc++.h>
 #include "utils.h"
 #include "bag.h"
@@ -243,3 +246,5 @@ public:
     }
     
 };
+
+#endif

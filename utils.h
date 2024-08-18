@@ -1,3 +1,6 @@
+#ifndef UTILS_H
+#define UTILS_H
+
 #include <iostream>
 #include <windows.h>
 using namespace std;
@@ -48,3 +51,5 @@ void rect(int x, int y, int w, int h) { // 좌상단 꼭짓점 좌표 (x, y)부�
         for (int _ = w; _--;) cout << PIXEL_CHAR;
     }
 }
+
+#endif

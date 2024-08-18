@@ -1,3 +1,6 @@
+#ifndef TETROMINO_H
+#define TETROMINO_H
+
 #include <bits/stdc++.h>
 #include "coordinate.h"
 using namespace std;
@@ -67,3 +70,5 @@ public:
         return maxY;
     }
 };
+
+#endif

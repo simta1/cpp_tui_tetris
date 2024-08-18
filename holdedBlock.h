@@ -1,3 +1,6 @@
+#ifndef HOLDEDBLOCK_H
+#define HOLDEDBLOCK_H
+
 #include "tetromino.h"
 
 class HoldedBlock : public Tetromino {
@@ -16,3 +19,5 @@ public:
         return activated;
     }
 };
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef FALLINGBLOCK_H
+#define FALLINGBLOCK_H
+
 #include "tetromino.h"
 #include "move.h"
 
@@ -64,3 +67,5 @@ public:
         }
     }
 };
+
+#endif

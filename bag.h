@@ -1,3 +1,6 @@
+#ifndef BAG_H
+#define BAG_H
+
 #include <vector>
 #include <queue>
 #include <numeric>
@@ -33,3 +36,5 @@ public:
         return tmp;
     }
 };
+
+#endif
