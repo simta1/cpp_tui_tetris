@@ -11,7 +11,7 @@ private:
     bool fixed;
 
 public:
-    FallingBlock() = default;
+    FallingBlock() : Tetromino() {}
     FallingBlock(int kind, int boardCenterX) : Tetromino(kind) {
         // board 중앙 최상단으로 이동
         x = boardCenterX - getCenterX();

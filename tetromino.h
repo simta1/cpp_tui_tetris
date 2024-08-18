@@ -49,7 +49,7 @@ private:
     }
 
 public:
-    Tetromino() = default;
+    Tetromino() : kind(0) {}
     Tetromino(int kind) : kind(kind) {
         for (auto pos : tetrominoShapes[kind]) shape.push_back(Coordinate(pos[0], pos[1]));
         init();

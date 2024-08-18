@@ -29,7 +29,8 @@ enum class ConsoleColor {
     MAGENTA,
     YELLOW,
     WHITE,
-    ORIGINALBG = 0
+    ORIGINALBG = BLACK,
+    BORDER_DEFAULT = DARKGRAY
 };
 
 void setColor(ConsoleColor color, ConsoleColor bgColor = ConsoleColor::ORIGINALBG) { // bg = background

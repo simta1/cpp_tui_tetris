@@ -8,7 +8,7 @@ private:
     bool activated;
 
 public:
-    HoldedBlock() = default;
+    HoldedBlock() : Tetromino(), activated(false) {}
     HoldedBlock(int kind) : Tetromino(kind), activated(false) {}
     
     void activate() {
