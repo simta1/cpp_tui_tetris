@@ -37,6 +37,7 @@ private:
     bool gameover;
 
     void hold() {
+        // TODO
 
     }
 
@@ -85,6 +86,10 @@ private:
         }
 
         return true;
+    }
+    
+    bool checkFallingBlockCanDrop() {
+        return checkFallingBlockCanMove(0, 1);
     }
 
     bool checkFallingBlockInBorder() {
@@ -140,7 +145,7 @@ private:
     void update() {
         if (haveFullRow()) breakFullRow();
         else if (timer_drop.isOver()) {
-            if (checkFallingBlockCanMove(0, 1)) fallingBlock.drop();
+            if (checkFallingBlockCanDrop()) fallingBlock.drop();
             else {
                 if (checkFallingBlockInBorder()) {
                     score += putFallingBlock();
@@ -207,42 +212,48 @@ public:
     }
 
     void applyMove(Move move) {
+        paused = false;
+
+        bool canApply = false;
+        
         switch (move) {
             case Move::LEFT:
-                if (checkFallingBlockCanMove(-1, 0)) fallingBlock.applyMove(move);
+                canApply = checkFallingBlockCanMove(-1, 0);
                 break;
 
             case Move::DOWN:
-                if (checkFallingBlockCanMove(0, 1)) fallingBlock.applyMove(move);
+                canApply = checkFallingBlockCanMove(0, 1);
                 break;
 
             case Move::RIGHT:
-                if (checkFallingBlockCanMove(1, 0)) fallingBlock.applyMove(move);
+                canApply = checkFallingBlockCanMove(1, 0);
                 break;
 
             case Move::ROTATE_CCW:
-                // TODO
+                canApply = checkFallingBlockCanRotate();
                 break;
 
             case Move::ROTATE_CW:
-                // TODO
+                canApply = checkFallingBlockCanRotate();
                 break;
 
             case Move::HARDDROP:
-                // TODO
+                canApply = true;
+
+                // hard drop 후에는 바로 put되도록 타이머 조정
                 timer_drop.end();
                 timer_hardDropped.init();
                 break;
 
             case Move::HOLD:
-                // TODO
                 hold();
-                break;
+                return;
         }
 
-        // TODO : move 후에 블럭이 바로 put되지 않도록 타이머 보정 필요
-
-        paused = false;
+        if (canApply) {
+            fallingBlock.applyMove(move);
+            if (!checkFallingBlockCanDrop()) timer_drop.init();
+        }
     }
     
 };
