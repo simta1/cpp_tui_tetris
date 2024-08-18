@@ -2,7 +2,8 @@
 #define GAME_H
 
 #include <bits/stdc++.h>
-#include "utils.h"
+#include "ConsoleColor.h"
+#include "lazyPrinter.h"
 #include "bag.h"
 #include "fallingBlock.h"
 #include "holdedBlock.h"
@@ -11,15 +12,26 @@
 #include "rotateDirection.h"
 using namespace std;
 
-// TODO nextblock 만들어야 함
+// ms 기준
+const int dropTime = 500;
+const int hardDropAnimationTime = 40;
+const int breakRowAnimationTime = 130;
+
+// TODO nextblock 추가
+// TODO playTime 추가
+// TODO gameover 시 replay 추가
+// TODO ghostblock 추가
+// TODO harddrop 시각효과 추가
 template <int ROWS, int COLS>
 class Game {
 private:
     // 출력 관련
-    const int LEN = 1; // 격자칸의 한 변에 사용될 픽셀 개수
-    const int MARGIN_HEIGHT = 3; // 보드판 상단에 들어갈 여백 길이(단위 : 격자개수)
-    const int MARGIN_WIDTH = 6; // 보드판 좌측에 들어갈 여백 길이(단위 : 격자개수)
+    static constexpr int LEN = 1; // 격자칸의 한 변에 사용될 픽셀 개수
+    static constexpr int MARGIN_HEIGHT = 3; // 보드판 상단에 들어갈 여백 길이(단위 : 격자개수)
+    static constexpr int MARGIN_WIDTH = 6; // 보드판 좌측에 들어갈 여백 길이(단위 : 격자개수)
     vector<pair<int, int> > borderPos;
+
+    LazyPrinter lazyPrinter;
 
     // 게임 로직 관련
     vector<vector<int> > board;
@@ -35,7 +47,7 @@ private:
     vector<int> fullRows;
 
     // 추가 정보
-    int score;
+    int brokenLines;
     double playTime;
 
     bool paused;
@@ -58,48 +70,56 @@ private:
     }
 
     void drawGrid(int x, int y) {
-        rect((MARGIN_WIDTH + x) * LEN, (MARGIN_HEIGHT + y) * LEN, LEN, LEN);
+        lazyPrinter.rect((MARGIN_WIDTH + x) * LEN, (MARGIN_HEIGHT + y) * LEN, LEN, LEN);
     }
 
     void deleteMargin() {
-        setColor(ConsoleColor::ORIGINALBG);
-        rect(MARGIN_WIDTH * LEN, 0, (COLS + 2) * LEN, MARGIN_HEIGHT * LEN);
-        rect(0, MARGIN_HEIGHT * LEN, MARGIN_WIDTH * LEN, (ROWS + 2) * LEN);
+        lazyPrinter.setColor(ConsoleColor::ORIGINALBG);
+        // lazyPrinter.rect(0, 0, (MARGIN_WIDTH + COLS + 2) * LEN, (MARGIN_HEIGHT + ROWS + 2) * LEN);
+        lazyPrinter.rect(MARGIN_WIDTH * LEN, 0, (COLS + 2) * LEN, MARGIN_HEIGHT * LEN);
+        lazyPrinter.rect(0, MARGIN_HEIGHT * LEN, MARGIN_WIDTH * LEN, (ROWS + 2) * LEN);
     }
 
     void drawBorder() {
-        setColor(ConsoleColor::BORDER_DEFAULT);
+        lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT);
         for (auto [i, j] : borderPos) drawGrid(i, j);
     }
 
     void drawBoard() {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
-                setColor(tetrominoColor[board[i][j]]);
+                lazyPrinter.setColor(tetrominoColor[board[i][j]]);
                 drawGrid(j + 1, i + 1);
+            }
+        }
+
+        // highlight Full Rows
+        for (auto fullRow : fullRows) {
+            for (int j = 0; j < COLS; j++) {
+                lazyPrinter.setColor(ConsoleColor::FULL_ROW_HIGHLIGHT, tetrominoColor[board[fullRow][j]]);
+                drawGrid(j + 1, fullRow + 1);
             }
         }
     }
     
     void drawFallingBlock() {
-        setColor(tetrominoColor[fallingBlock.getKind()]);
+        lazyPrinter.setColor(tetrominoColor[fallingBlock.getKind()]);
         for (auto [x, y] : fallingBlock.getCoordinates()) drawGrid(x + 1, y + 1);
     }
 
     void drawHold() {
         // hold Border
-        setColor(ConsoleColor::BORDER_DEFAULT);
-        gotoxy(MARGIN_WIDTH / 2 * LEN * PIXEL_WIDTH - 2, MARGIN_HEIGHT * LEN * PIXEL_HEIGHT); // "HOLD"가 4글자기 때문에 -2로 중앙정렬
-        cout << "HOLD";
+
+        lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT);
+        lazyPrinter.setXY(MARGIN_WIDTH / 2 * LEN * PIXEL_WIDTH - 2, MARGIN_HEIGHT * LEN * PIXEL_HEIGHT); // "HOLD"가 4글자기 때문에 -2로 중앙정렬
+        lazyPrinter.text("HOLD");
 
         // holded Block
         int hx = -MARGIN_WIDTH / 2 - holdedBlock.getCenterX();
         int hy = MARGIN_HEIGHT / 2 + 2; // - holdedBlock.getCneterY();
 
-        setColor(tetrominoColor[holdedBlock.getKind()]);
-        for (auto [x, y] : holdedBlock.getShape()) {
-            drawGrid(x + hx, y + hy);
-        }
+        lazyPrinter.setColor(tetrominoColor[holdedBlock.getKind()]);
+        for (auto [x, y] : holdedBlock.getShape()) drawGrid(x + hx, y + hy);
     }
 
     bool inRange(int x, int y) {
@@ -123,17 +143,8 @@ private:
     
     // TODO 회전 위치 보정 추가해야 됨
     bool checkFallingBlockCanRotate(RotateDirection direction) {
-        setColor(ConsoleColor::WHITE);
-        gotoxy(40, 3);
-        cout << fallingBlock.getX() << ", " << fallingBlock.getY();
-        gotoxy(40, 4);
-        for (auto [x, y] : fallingBlock.getShape()) cout << "(" << x + fallingBlock.getX() << ", " << y + fallingBlock.getY() << "), ";
-        gotoxy(40, 5);
         for (Coordinate coordinate : fallingBlock.getShape()) {
             coordinate.rotate(direction);
-
-            cout << "(" << coordinate.x + fallingBlock.getX() << ", " << coordinate.y + fallingBlock.getY() << "), ";
-
             if (!checkGridCanFill(coordinate.x + fallingBlock.getX(), coordinate.y + fallingBlock.getY())) return false;
         }
 
@@ -171,7 +182,17 @@ private:
     }
 
     void breakFullRow() {
+        if (timer_breakRow.isOver()) {
+            int rowToBreak = fullRows.back();
+            fullRows.pop_back();
 
+            for (int col = 0; col < COLS; col++) {
+                for (int row = rowToBreak; row > 0; row--) board[row][col] = board[row - 1][col];
+                board[0][col] = 0;
+            }
+
+            for (auto &fullRow : fullRows) ++fullRow;
+        }
     }
 
     int putFallingBlock() { // 꽉 차있는 줄 개수 리턴
@@ -190,11 +211,6 @@ private:
         timer_drop.init();
 
         // TODO nextBlock 추가
-
-        // TODO test용 코드 삭제해야됨
-        gotoxy(40, 0);
-        cout << "KIND : " << kind << " ::: ";
-        for (auto [x, y] : fallingBlock.getCoordinates()) cout << "(" << x << ", " << y << "), ";
     }
 
     void update() {
@@ -203,7 +219,7 @@ private:
             if (checkFallingBlockCanDrop()) fallingBlock.drop();
             else {
                 if (checkFallingBlockInBorder()) {
-                    score += putFallingBlock();
+                    brokenLines += putFallingBlock();
                     holdedBlock.activate();
                     makeNewFallingBlock();
                 }
@@ -213,17 +229,22 @@ private:
     }
 
     void display() {
-        // TODO 출력 최적화 해야 될 듯. 업데이트된 좌표만 출력하게 해야 될 듯 화면 깜빡임 너무 심함
         deleteMargin();
         drawBorder();
         drawBoard();
         drawFallingBlock();
-
         drawHold();
+
+        lazyPrinter.render();
     }
 
 public:
-    Game() : board(ROWS, vector<int>(COLS)), timer_drop(17, true), timer_hardDropped(1, false), timer_breakRow(4, true) {
+    Game(int sleepTime) : \
+        board(ROWS, vector<int>(COLS)), lazyPrinter((MARGIN_WIDTH + COLS + 2) * LEN, (MARGIN_HEIGHT + ROWS + 2) * LEN), \
+        timer_drop(dropTime / sleepTime, true), \
+        timer_hardDropped(hardDropAnimationTime / sleepTime, false), \
+        timer_breakRow(breakRowAnimationTime / sleepTime, true) {
+
         // border
         borderPos.reserve(ROWS + COLS + 2 << 1);
 
@@ -247,7 +268,7 @@ public:
         fullRows.clear();
 
         // init
-        score = 0;
+        brokenLines = 0;
         playTime = 0;
 
         paused = false;

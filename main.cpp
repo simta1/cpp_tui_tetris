@@ -35,7 +35,9 @@ void consoleInit() {
 int main() {
     consoleInit();
 
-    Game<20, 10> game;
+    const int sleepTime = 10;
+
+    Game<20, 10> game(sleepTime);
     game.start();
 
     while (1) {
@@ -54,8 +56,7 @@ int main() {
 
         game.run();
 
-        // todo 출력 최적화한 뒤 sleep간격 줄여야 됨
-        Sleep(30);
+        Sleep(sleepTime);
     }
 
     return 0;
