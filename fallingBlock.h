@@ -35,7 +35,7 @@ public:
     }
 
     int getY() {
-        return x;
+        return y;
     }
 
     void drop() {

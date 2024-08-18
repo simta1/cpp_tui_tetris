@@ -73,6 +73,7 @@ public:
 
     void rotate(RotateDirection direction) {
         for (auto &coordinate : shape) coordinate.rotate(direction);
+        init();
     }
 };
 

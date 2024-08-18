@@ -123,8 +123,17 @@ private:
     
     // TODO 회전 위치 보정 추가해야 됨
     bool checkFallingBlockCanRotate(RotateDirection direction) {
+        setColor(ConsoleColor::WHITE);
+        gotoxy(40, 3);
+        cout << fallingBlock.getX() << ", " << fallingBlock.getY();
+        gotoxy(40, 4);
+        for (auto [x, y] : fallingBlock.getShape()) cout << "(" << x + fallingBlock.getX() << ", " << y + fallingBlock.getY() << "), ";
+        gotoxy(40, 5);
         for (Coordinate coordinate : fallingBlock.getShape()) {
             coordinate.rotate(direction);
+
+            cout << "(" << coordinate.x + fallingBlock.getX() << ", " << coordinate.y + fallingBlock.getY() << "), ";
+
             if (!checkGridCanFill(coordinate.x + fallingBlock.getX(), coordinate.y + fallingBlock.getY())) return false;
         }
 
@@ -260,10 +269,11 @@ public:
     }
 
     void applyMove(Move move) {
+        if (gameover) return;
+
         paused = false;
 
         bool canApply = false;
-        
         switch (move) {
             case Move::LEFT:
                 canApply = checkFallingBlockCanMove(-1, 0);
