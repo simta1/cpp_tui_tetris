@@ -34,7 +34,7 @@ void consoleInit() {
 int main() {
     consoleInit();
 
-    Game<10, 20> game;
+    Game<20, 10> game;
     game.start();
 
     while (1) {
@@ -52,6 +52,9 @@ int main() {
         }
 
         game.run();
+
+        // TODO sleep 시간 정해야 됨
+        // sleep(__);
     }
 
     return 0;
