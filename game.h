@@ -11,7 +11,10 @@
 #include "rotateDirection.h"
 using namespace std;
 
-// TODO nextblock 만들어야 함
+// TODO nextblock 추가
+// TODO playTime 추가
+// TODO replay 추가
+// TODO ghostblock 추가
 template <int ROWS, int COLS>
 class Game {
 private:
@@ -35,7 +38,7 @@ private:
     vector<int> fullRows;
 
     // 추가 정보
-    int score;
+    int brokenLines;
     double playTime;
 
     bool paused;
@@ -77,6 +80,14 @@ private:
             for (int j = 0; j < COLS; j++) {
                 setColor(tetrominoColor[board[i][j]]);
                 drawGrid(j + 1, i + 1);
+            }
+        }
+
+        // highlight Full Rows
+        for (auto fullRow : fullRows) {
+            for (int j = 0; j < COLS; j++) {
+                setColor(ConsoleColor::FULL_ROW_HIGHLIGHT, tetrominoColor[board[fullRow][j]]);
+                drawGrid(j + 1, fullRow + 1);
             }
         }
     }
@@ -123,17 +134,8 @@ private:
     
     // TODO 회전 위치 보정 추가해야 됨
     bool checkFallingBlockCanRotate(RotateDirection direction) {
-        setColor(ConsoleColor::WHITE);
-        gotoxy(40, 3);
-        cout << fallingBlock.getX() << ", " << fallingBlock.getY();
-        gotoxy(40, 4);
-        for (auto [x, y] : fallingBlock.getShape()) cout << "(" << x + fallingBlock.getX() << ", " << y + fallingBlock.getY() << "), ";
-        gotoxy(40, 5);
         for (Coordinate coordinate : fallingBlock.getShape()) {
             coordinate.rotate(direction);
-
-            cout << "(" << coordinate.x + fallingBlock.getX() << ", " << coordinate.y + fallingBlock.getY() << "), ";
-
             if (!checkGridCanFill(coordinate.x + fallingBlock.getX(), coordinate.y + fallingBlock.getY())) return false;
         }
 
@@ -171,7 +173,17 @@ private:
     }
 
     void breakFullRow() {
+        if (timer_breakRow.isOver()) {
+            int rowToBreak = fullRows.back();
+            fullRows.pop_back();
 
+            for (int col = 0; col < COLS; col++) {
+                for (int row = rowToBreak; row > 0; row--) board[row][col] = board[row - 1][col];
+                board[0][col] = 0;
+            }
+
+            for (auto &fullRow : fullRows) ++fullRow;
+        }
     }
 
     int putFallingBlock() { // 꽉 차있는 줄 개수 리턴
@@ -203,7 +215,7 @@ private:
             if (checkFallingBlockCanDrop()) fallingBlock.drop();
             else {
                 if (checkFallingBlockInBorder()) {
-                    score += putFallingBlock();
+                    brokenLines += putFallingBlock();
                     holdedBlock.activate();
                     makeNewFallingBlock();
                 }
@@ -247,7 +259,7 @@ public:
         fullRows.clear();
 
         // init
-        score = 0;
+        brokenLines = 0;
         playTime = 0;
 
         paused = false;

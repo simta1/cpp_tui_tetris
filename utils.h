@@ -30,6 +30,7 @@ enum class ConsoleColor {
     YELLOW,
     WHITE,
     ORIGINALBG = BLACK,
+    FULL_ROW_HIGHLIGHT = GRAY,
     BORDER_DEFAULT = DARKGRAY
 };
 
