@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "bag.h"
 #include "fallingBlock.h"
+#include "timer.h"
 using namespace std;
 
 enum class Move {
@@ -27,6 +28,12 @@ private:
     
     Bag<7> bag;
     FallingBlock fallingBlock;
+
+    Timer timer_drop;
+    Timer timer_hardDropped;
+    Timer timer_breakRow;
+
+    vector<int> fullRows;
 
     // 추가 정보
     int score;
@@ -64,14 +71,71 @@ private:
     
     void drawFallingBlock() {
         setColor(tetrominoColor[fallingBlock.getKind()]);
-        for (auto [x, y] : fallingBlock.getCoordinates()) drawGrid(x, y);
+        for (auto [x, y] : fallingBlock.getCoordinates()) drawGrid(x + 1, y + 1);
+    }
+
+    bool inRange(int x, int y) {
+        return x >= 0 && x < COLS && y >= 0 && y < ROWS;
+    }
+
+    bool checkGridCanFill(int x, int y) {
+        if (y < 0) return (x >= 0 && x < COLS);
+
+        if (!inRange(x, y)) return false;
+        return board[y][x] == 0;
+    }
+
+    bool checkFallingBlockCanMove(int dx, int dy) {
+        for (auto [x, y] : fallingBlock.getCoordinates()) {
+            if (!checkGridCanFill(x + dx, y + dy)) return false;
+        }
+
+        return true;
+    }
+
+    bool checkFallingBlockInBorder() {
+        for (auto [x, y] : fallingBlock.getCoordinates()) {
+            if (y < 0) return false;
+        }
+
+        return true;
+    }
+
+    bool checkRowFull(int row) {
+        for (int col = 0; col < COLS; col++) {
+            if (board[row][col] == 0) return false;
+        }
+
+        return true;
+    }
+
+    void updateFullRows() {
+        for (int row = 0; row < ROWS; row++) {
+            if (checkRowFull(row)) fullRows.push_back(row);
+        }
+    }
+
+    bool haveFullRow() {
+        return !fullRows.empty();
+    }
+
+    void breakFullRow() {
+
+    }
+
+    int putFallingBlock() { // 꽉 차있는 줄 개수 리턴
+        int kind = fallingBlock.getKind();
+        for (auto [x, y] : fallingBlock.getCoordinates()) board[y][x] = kind;
+
+        updateFullRows();
+        if (haveFullRow()) timer_breakRow.init();
+        return fullRows.size();
     }
 
     void makeNewFallingBlock() {
         int kind = bag.takeOut();
         fallingBlock = FallingBlock(kind, COLS / 2);
 
-        
         // test용 코드 삭제해야됨
         gotoxy(40, 0);
         cout << "KIND : " << kind << " ::: ";
@@ -79,7 +143,18 @@ private:
     }
 
     void update() {
-
+        if (haveFullRow()) breakFullRow();
+        else if (timer_drop.isOver()) {
+            if (checkFallingBlockCanMove(0, 1)) fallingBlock.drop();
+            else {
+                if (checkFallingBlockInBorder()) {
+                    score += putFallingBlock();
+                    // TODO HoldedBlock activate
+                    makeNewFallingBlock();
+                }
+                else gameover = true;
+            }
+        }
     }
 
     void display() {
@@ -91,7 +166,7 @@ private:
     }
 
 public:
-    Game() : board(ROWS, vector<int>(COLS)) {
+    Game() : board(ROWS, vector<int>(COLS)), timer_drop(17, true), timer_hardDropped(1, false), timer_breakRow(4, true) {
         // border
         borderPos.reserve(ROWS + COLS + 2 << 1);
 
@@ -115,6 +190,8 @@ public:
         // falling block
         makeNewFallingBlock();
 
+        fullRows.clear();
+
         // init
         score = 0;
         playTime = 0;
@@ -126,7 +203,7 @@ public:
     void run() {
         if (paused) return;
         
-        update();
+        if (!gameover) update();
         display();
     }
 
@@ -135,9 +212,6 @@ public:
     }
 
     void applyMove(Move move) {
-        // test용 코드 삭제해야됨
-        makeNewFallingBlock();
-
         gotoxy(0, 0);
         cout << static_cast<int>(move);
     }

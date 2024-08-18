@@ -60,7 +60,7 @@ public:
     }
     
     int getCenterX() {
-        return minX + maxX >> 1;
+        return minX + maxX + 1 >> 1;
     }
 
     int getMaxY() {

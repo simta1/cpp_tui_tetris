@@ -9,7 +9,7 @@ public:
     FallingBlock(int kind, int boardCenterX) : Tetromino(kind) {
         // board 중앙 최상단으로 이동
         x = boardCenterX - getCenterX();
-        y = -getMaxY();
+        y = -(getMaxY() + 1);
     }
 
     // shape(상대좌표)에 현재 fallingBlock의 좌표만큼 평행이동시킨 절대좌표 리턴
@@ -23,4 +23,7 @@ public:
         return res;
     }
 
+    void drop() {
+        ++y;
+    }
 };
