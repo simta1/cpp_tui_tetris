@@ -1,11 +1,10 @@
 #include <windows.h>
 #include <conio.h> // _kbhit, _getch
 #include "game.h"
-
-const char KEYBOARD_ARROW_UP = 72;
-const char KEYBOARD_ARROW_LEFT = 75;
-const char KEYBOARD_ARROW_RIGHT = 77;
-const char KEYBOARD_ARROW_DOWN = 80;
+#define KEYBOARD_ARROW_UP 72
+#define KEYBOARD_ARROW_LEFT 75
+#define KEYBOARD_ARROW_RIGHT 77
+#define KEYBOARD_ARROW_DOWN 80
 
 // -------------------------------------------------------- 사용자 지정 ------------------------------------------------------------
 const char KEY_PAUSE_GAME = 'p';

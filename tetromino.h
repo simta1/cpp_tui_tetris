@@ -76,6 +76,8 @@ public:
     }
 
     void rotate(RotateDirection direction) {
+        if (kind == 7) return; // 네모모양, 회전해도 어차피 안 변함
+
         for (auto &coordinate : shape) coordinate.rotate(direction);
         init();
     }
