@@ -1,5 +1,7 @@
 #include <bits/stdc++.h>
 #include "utils.h"
+#include "bag.h"
+#include "fallingBlock.h"
 using namespace std;
 
 enum class Move {
@@ -17,11 +19,14 @@ class Game {
 private:
     // 출력 관련
     const int LEN = 1; // 격자칸의 한 변에 사용될 픽셀 개수
-    vector<pair<int, int> > updatedPos; // 0-based // 출력 최적화용. 화면 출력할 때 이전 화면과 달라진 좌표만 출력.
+    const int MARGIN = 3; // 보드판 위에 들어갈 여백 높이(단위 : 격자개수)
+    vector<pair<int, int> > borderPos;
 
     // 게임 로직 관련
     vector<vector<int> > board;
-    vector<pair<int, int> > borderPos; // first : i(=y), second : j(=x)
+    
+    Bag<7> bag;
+    FallingBlock fallingBlock;
 
     // 추가 정보
     int score;
@@ -34,25 +39,55 @@ private:
 
     }
 
-    void drawPixel(int i, int j) {
-        rect(j * LEN, i * LEN, LEN, LEN);
+    void drawGrid(int x, int y) {
+        rect(x * LEN, (MARGIN + y) * LEN, LEN, LEN);
+    }
+
+    void deleteMargin() {
+        setColor(ConsoleColor::ORIGINALBG);
+        rect(0, 0, (COLS + 2) * LEN, MARGIN * LEN);
+    }
+
+    void drawBorder() {
+        setColor(ConsoleColor::DARKGRAY);
+        for (auto [i, j] : borderPos) drawGrid(i, j);
+    }
+
+    void drawBoard() {
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLS; j++) {
+                setColor(tetrominoColor[board[i][j]]);
+                drawGrid(j + 1, i + 1);
+            }
+        }
+    }
+    
+    void drawFallingBlock() {
+        setColor(tetrominoColor[fallingBlock.getKind()]);
+        for (auto [x, y] : fallingBlock.getCoordinates()) drawGrid(x, y);
+    }
+
+    void makeNewFallingBlock() {
+        int kind = bag.takeOut();
+        fallingBlock = FallingBlock(kind, COLS / 2);
+
+        
+        // test용 코드 삭제해야됨
+        gotoxy(40, 0);
+        cout << "KIND : " << kind << " ::: ";
+        for (auto [x, y] : fallingBlock.getCoordinates()) cout << "(" << x << ", " << y << "), ";
     }
 
     void update() {
-        // test
-            int ri = rand() % ROWS;
-            int rj = rand() % COLS;
-            board[ri][rj] = rand() % 15;
-            updatedPos.push_back({ri, rj});
-        //
+
     }
 
     void display() {
-        for (auto [i, j] : updatedPos) {
-            setColor(static_cast<ConsoleColor>(board[i][j]));
-            drawPixel(-~i, -~j); // 1-based
-        }
-        updatedPos.clear();
+        // TODO 출력 최적화 해야 될 듯. 업데이트된 좌표만 출력하게 해야 될 듯 화면 깜빡임 너무 심함
+        deleteMargin();
+        drawBorder();
+        drawBoard();
+        drawFallingBlock();
     }
 
 public:
@@ -61,13 +96,13 @@ public:
         borderPos.reserve(ROWS + COLS + 2 << 1);
 
         for (int j = 0; j <= COLS + 1; j++) {
-            borderPos.push_back({0, j});
-            borderPos.push_back({ROWS + 1, j});
+            borderPos.push_back({j, 0});
+            borderPos.push_back({j, ROWS + 1});
         }
 
         for (int i = 1; i <= ROWS; i++) {
-            borderPos.push_back({i, 0});
-            borderPos.push_back({i, COLS + 1});
+            borderPos.push_back({0, i});
+            borderPos.push_back({COLS + 1, i});
         }
     }
 
@@ -77,11 +112,8 @@ public:
             for (int j = 0; j < COLS; j++) board[i][j] = 0;
         }
 
-        updatedPos.clear();
-
-        // border
-        setColor(ConsoleColor::GRAY);
-        for (auto [i, j] : borderPos) drawPixel(i, j);
+        // falling block
+        makeNewFallingBlock();
 
         // init
         score = 0;
@@ -103,9 +135,11 @@ public:
     }
 
     void applyMove(Move move) {
+        // test용 코드 삭제해야됨
+        makeNewFallingBlock();
+
         gotoxy(0, 0);
         cout << static_cast<int>(move);
     }
-
     
 };
