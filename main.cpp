@@ -16,9 +16,6 @@ const char KEY_ROTATE_RIGHT = KEYBOARD_ARROW_RIGHT;
 const char KEY_DROP_SOFT = 's';
 const char KEY_DROP_HARD = KEYBOARD_ARROW_UP;
 const char KEY_HOlD = ' ';
-
-// TODO 키 안겹치게 전부 static_assert 할지 고민
-
 // --------------------------------------------------------------------------------------------------------------------------------
 
 void consoleInit() {

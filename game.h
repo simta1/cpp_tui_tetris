@@ -17,11 +17,6 @@ const int dropTime = 500;
 const int hardDropAnimationTime = 40;
 const int breakRowAnimationTime = 130;
 
-// TODO nextblock 추가
-// TODO playTime 추가
-// TODO gameover 시 replay 추가
-// TODO ghostblock 추가
-// TODO harddrop 시각효과 추가
 template <int ROWS, int COLS>
 class Game {
 private:
@@ -141,7 +136,6 @@ private:
         return true;
     }
     
-    // TODO 회전 위치 보정 추가해야 됨
     bool checkFallingBlockCanRotate(RotateDirection direction) {
         for (Coordinate coordinate : fallingBlock.getShape()) {
             coordinate.rotate(direction);
@@ -209,8 +203,6 @@ private:
         if (!kind) kind = bag.takeOut();
         fallingBlock = FallingBlock(kind, COLS / 2);
         timer_drop.init();
-
-        // TODO nextBlock 추가
     }
 
     void update() {
