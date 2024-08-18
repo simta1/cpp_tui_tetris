@@ -31,9 +31,7 @@ void consoleInit() {
 int main() {
     consoleInit();
 
-    const int sleepTime = 10;
-
-    Game<20, 10> game(sleepTime);
+    Game<20, 10> game;
     game.start();
 
     while (1) {

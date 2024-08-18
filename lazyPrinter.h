@@ -11,7 +11,8 @@ const char PIXEL_CHAR = 'X';
 const int PIXEL_WIDTH = 2;
 const int PIXEL_HEIGHT = 1;
 
-const int HARDDROP_EFFECT_PIXEL_LEN = 1;
+const int HARDDROP_VIBRATION_LEN = 1;
+const int BREAKROW_VIBRATION_LEN = 1;
 
 class LazyPrinter {
 private:
@@ -36,7 +37,7 @@ private:
         curY += translateY;
 
         if (curX >= 0 && curX < WIDTH && curY >= 0 && curY < HEIGHT) console[curX++][curY] = Data{ch, curColor};
-        else cerr << "out of bounds at (" << curX << ", " << curY << ")\n";
+        // else cerr << "out of bounds at (" << curX << ", " << curY << ")\n";
 
         curX -= translateX;
         curY -= translateY;
@@ -56,7 +57,7 @@ private:
 
 public:
     LazyPrinter(int width, int height) : \
-        WIDTH(width * PIXEL_WIDTH), HEIGHT(height * PIXEL_HEIGHT + HARDDROP_EFFECT_PIXEL_LEN), \
+        WIDTH(width * PIXEL_WIDTH + 2 * BREAKROW_VIBRATION_LEN), HEIGHT(height * PIXEL_HEIGHT + HARDDROP_VIBRATION_LEN), \
         translateX(0), translateY(0), \
         curColor(convertColorToInt(ConsoleColor::WHITE)), curX(0), curY(0), \
         prevConsole(WIDTH, vector<Data>(HEIGHT, {PIXEL_CHAR, curColor})), \
@@ -109,7 +110,8 @@ public:
             }
         }
 
-        translateX = translateY = 0;
+        translateX = BREAKROW_VIBRATION_LEN;
+        translateY = 0;
     }
 
 

@@ -13,9 +13,11 @@
 using namespace std;
 
 // ms 기준
+const int sleepTime = 10;
 const int dropTime = 500;
 const int hardDropAnimationTime = 30;
-const int breakRowAnimationTime = 90;
+const int breakRowAnimationTime = 70;
+const int breakRowVibrationPeriod = breakRowAnimationTime / 2;
 
 template <int ROWS, int COLS>
 class Game {
@@ -205,6 +207,7 @@ private:
         for (auto fullRow : fullRows) {
             for (int j = 0; j < COLS; j++) {
                 lazyPrinter.setColor(tetrominoColor[board[fullRow][j]], ConsoleColor::FULL_ROW_HIGHLIGHT);
+                lazyPrinter.setColor(ConsoleColor::FULL_ROW_HIGHLIGHT, tetrominoColor[board[fullRow][j]]);
                 drawGrid(j + 1, fullRow + 1);
             }
         }
@@ -250,7 +253,12 @@ private:
 
     void display() {
         // harddrop 진동효과
-        // if (!timer_hardDropped.isOver()) lazyPrinter.translate(0, HARDDROP_EFFECT_PIXEL_LEN);
+        // if (!timer_hardDropped.isOver()) lazyPrinter.translate(0, HARDDROP_VIBRATION_LEN);
+
+        if (haveFullRow()) {
+            int sign = 1 - 2 * (timer_breakRow.getTime() / (breakRowVibrationPeriod / sleepTime) % 2);
+            lazyPrinter.translate(sign * BREAKROW_VIBRATION_LEN, 0);
+        }
 
         drawMargin();
         drawBorder();
@@ -262,7 +270,7 @@ private:
     }
 
 public:
-    Game(int sleepTime) : \
+    Game() : \
         board(ROWS, vector<int>(COLS)), lazyPrinter((MARGIN_WIDTH + COLS + 2) * LEN, (MARGIN_HEIGHT + ROWS + 2) * LEN), \
         timer_drop(dropTime / sleepTime, true), \
         timer_hardDropped(hardDropAnimationTime / sleepTime, false), \
