@@ -16,6 +16,10 @@ public:
     void init() {
         elapsedTime = 0;
     }
+
+    void end() {
+        elapsedTime = endTime;
+    }
     
     bool isOver() {
         work();

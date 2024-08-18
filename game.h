@@ -3,17 +3,8 @@
 #include "bag.h"
 #include "fallingBlock.h"
 #include "timer.h"
+#include "move.h"
 using namespace std;
-
-enum class Move {
-    LEFT,
-    RIGHT,
-    DOWN,
-    HARDDROP,
-    ROTATE_CW,
-    ROTATE_CCW,
-    HOLD
-};
 
 template <int ROWS, int COLS>
 class Game {
@@ -126,6 +117,7 @@ private:
     int putFallingBlock() { // 꽉 차있는 줄 개수 리턴
         int kind = fallingBlock.getKind();
         for (auto [x, y] : fallingBlock.getCoordinates()) board[y][x] = kind;
+        fallingBlock.put();
 
         updateFullRows();
         if (haveFullRow()) timer_breakRow.init();
@@ -212,8 +204,42 @@ public:
     }
 
     void applyMove(Move move) {
-        gotoxy(0, 0);
-        cout << static_cast<int>(move);
+        switch (move) {
+            case Move::LEFT:
+                if (checkFallingBlockCanMove(-1, 0)) fallingBlock.applyMove(move);
+                break;
+
+            case Move::DOWN:
+                if (checkFallingBlockCanMove(0, 1)) fallingBlock.applyMove(move);
+                break;
+
+            case Move::RIGHT:
+                if (checkFallingBlockCanMove(1, 0)) fallingBlock.applyMove(move);
+                break;
+
+            case Move::ROTATE_CCW:
+                // TODO
+                break;
+
+            case Move::ROTATE_CW:
+                // TODO
+                break;
+
+            case Move::HARDDROP:
+                // TODO
+                timer_drop.end();
+                timer_hardDropped.init();
+                break;
+
+            case Move::HOLD:
+                // TODO
+                hold();
+                break;
+        }
+
+        // TODO : move 후에 블럭이 바로 put되지 않도록 타이머 보정 필요
+
+        paused = false;
     }
     
 };
