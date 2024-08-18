@@ -48,8 +48,10 @@ private:
     Timer timer_hardDropped;
     Timer timer_breakRow;
 
+    bool hardDropped;
     int prevHardDropHeight;
     int prevHardDropPosX;
+    int prevHardDropPosY;
 
     vector<int> fullRows;
 
@@ -66,7 +68,8 @@ private:
             fallingBlock.drop();
             ++prevHardDropHeight;
         }
-        prevHardDropPosX = fallingBlock.getX();
+        prevHardDropPosX = fallingBlock.getX() + fallingBlock.getCenterX();
+        prevHardDropPosY = fallingBlock.getY() + fallingBlock.getCenterY();
 
         // hard drop 후에는 바로 put되도록 타이머 조정
         timer_drop.end();
@@ -176,6 +179,8 @@ private:
     }
 
     void update() {
+        hardDropped = !timer_hardDropped.isOver();
+
         if (haveFullRow()) breakFullRow();
         else if (timer_drop.isOver()) {
             if (checkFallingBlockCanDrop()) fallingBlock.drop();
@@ -205,7 +210,6 @@ private:
     }
 
     void drawBorder() {
-        bool hardDropped = !timer_hardDropped.isOver();
         for (auto [x, y] : borderPos) {
             if (hardDropped && getTaxiDist(prevHardDropPosX, ROWS + 1, x, y) < min(int(timer_hardDropped.getTime() * HARDDROP_EFFECT_VELOCITY), prevHardDropHeight / HARDDROP_EFFECT_INSENSITIVITY)) lazyPrinter.setColor(ConsoleColor::WHITE, ConsoleColor::WHITE);
             else lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT, ConsoleColor::BORDER_DEFAULT);
@@ -216,7 +220,8 @@ private:
     void drawBoard() {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
-                lazyPrinter.setColor(tetrominoColor[board[i][j]], tetrominoColor[board[i][j]]);
+                if (hardDropped && board[i][j] && getTaxiDist(prevHardDropPosX, prevHardDropPosY, j, i) < 0.5 * min(int(timer_hardDropped.getTime() * HARDDROP_EFFECT_VELOCITY), prevHardDropHeight / HARDDROP_EFFECT_INSENSITIVITY)) lazyPrinter.setColor(ConsoleColor::WHITE, ConsoleColor::WHITE);
+                else lazyPrinter.setColor(tetrominoColor[board[i][j]], tetrominoColor[board[i][j]]);
                 drawGrid(j + 1, i + 1);
             }
         }

@@ -67,6 +67,10 @@ public:
         return minX + maxX + 1 >> 1;
     }
 
+    int getCenterY() {
+        return minY + maxY + 1 >> 1;
+    }
+
     int getMinY() {
         return minY;
     }
