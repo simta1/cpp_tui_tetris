@@ -15,15 +15,19 @@ using namespace std;
 // ms 기준
 const int dropTime = 500;
 const int hardDropAnimationTime = 40;
-const int breakRowAnimationTime = 130;
+const int breakRowAnimationTime = 100;
 
 template <int ROWS, int COLS>
 class Game {
 private:
     // 출력 관련
     static constexpr int LEN = 1; // 격자칸의 한 변에 사용될 픽셀 개수
+    static constexpr int HOLD_BORDER_WIDTH = 6;
+    static constexpr int HOLD_BORDER_HEIGHT = 4;
     static constexpr int MARGIN_HEIGHT = 3; // 보드판 상단에 들어갈 여백 길이(단위 : 격자개수)
-    static constexpr int MARGIN_WIDTH = 6; // 보드판 좌측에 들어갈 여백 길이(단위 : 격자개수)
+    static constexpr int MARGIN_WIDTH = HOLD_BORDER_WIDTH + 2; // 보드판 좌측에 들어갈 여백 길이(단위 : 격자개수)
+
+
     vector<pair<int, int> > borderPos;
 
     LazyPrinter lazyPrinter;
@@ -62,59 +66,6 @@ private:
             holdedBlock = HoldedBlock(fallingBlock.getKind());
             makeNewFallingBlock(prevHoldedBlockKind);
         }
-    }
-
-    void drawGrid(int x, int y) {
-        lazyPrinter.rect((MARGIN_WIDTH + x) * LEN, (MARGIN_HEIGHT + y) * LEN, LEN, LEN);
-    }
-
-    void deleteMargin() {
-        lazyPrinter.setColor(ConsoleColor::ORIGINALBG);
-        // lazyPrinter.rect(0, 0, (MARGIN_WIDTH + COLS + 2) * LEN, (MARGIN_HEIGHT + ROWS + 2) * LEN);
-        lazyPrinter.rect(MARGIN_WIDTH * LEN, 0, (COLS + 2) * LEN, MARGIN_HEIGHT * LEN);
-        lazyPrinter.rect(0, MARGIN_HEIGHT * LEN, MARGIN_WIDTH * LEN, (ROWS + 2) * LEN);
-    }
-
-    void drawBorder() {
-        lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT);
-        for (auto [i, j] : borderPos) drawGrid(i, j);
-    }
-
-    void drawBoard() {
-        for (int i = 0; i < ROWS; i++) {
-            for (int j = 0; j < COLS; j++) {
-                lazyPrinter.setColor(tetrominoColor[board[i][j]]);
-                drawGrid(j + 1, i + 1);
-            }
-        }
-
-        // highlight Full Rows
-        for (auto fullRow : fullRows) {
-            for (int j = 0; j < COLS; j++) {
-                lazyPrinter.setColor(ConsoleColor::FULL_ROW_HIGHLIGHT, tetrominoColor[board[fullRow][j]]);
-                drawGrid(j + 1, fullRow + 1);
-            }
-        }
-    }
-    
-    void drawFallingBlock() {
-        lazyPrinter.setColor(tetrominoColor[fallingBlock.getKind()]);
-        for (auto [x, y] : fallingBlock.getCoordinates()) drawGrid(x + 1, y + 1);
-    }
-
-    void drawHold() {
-        // hold Border
-
-        lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT);
-        lazyPrinter.setXY(MARGIN_WIDTH / 2 * LEN * PIXEL_WIDTH - 2, MARGIN_HEIGHT * LEN * PIXEL_HEIGHT); // "HOLD"가 4글자기 때문에 -2로 중앙정렬
-        lazyPrinter.text("HOLD");
-
-        // holded Block
-        int hx = -MARGIN_WIDTH / 2 - holdedBlock.getCenterX();
-        int hy = MARGIN_HEIGHT / 2 + 2; // - holdedBlock.getCneterY();
-
-        lazyPrinter.setColor(tetrominoColor[holdedBlock.getKind()]);
-        for (auto [x, y] : holdedBlock.getShape()) drawGrid(x + hx, y + hy);
     }
 
     bool inRange(int x, int y) {
@@ -220,8 +171,65 @@ private:
         }
     }
 
+    void drawGrid(int x, int y) {
+        lazyPrinter.rect((MARGIN_WIDTH + x) * LEN, (MARGIN_HEIGHT + y) * LEN, LEN, LEN);
+    }
+
+    void drawMargin() {
+        lazyPrinter.setColor(ConsoleColor::ORIGINALBG);
+        // lazyPrinter.rect(0, 0, (MARGIN_WIDTH + COLS + 2) * LEN, (MARGIN_HEIGHT + ROWS + 2) * LEN);
+        lazyPrinter.rect(MARGIN_WIDTH * LEN, 0, (COLS + 2) * LEN, MARGIN_HEIGHT * LEN);
+        lazyPrinter.rect(0, MARGIN_HEIGHT * LEN, MARGIN_WIDTH * LEN, (ROWS + 2) * LEN);
+    }
+
+    void drawBorder() {
+        lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT);
+        for (auto [i, j] : borderPos) drawGrid(i, j);
+    }
+
+    void drawBoard() {
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLS; j++) {
+                lazyPrinter.setColor(tetrominoColor[board[i][j]]);
+                drawGrid(j + 1, i + 1);
+            }
+        }
+
+        // highlight Full Rows
+        for (auto fullRow : fullRows) {
+            for (int j = 0; j < COLS; j++) {
+                lazyPrinter.setColor(ConsoleColor::FULL_ROW_HIGHLIGHT, tetrominoColor[board[fullRow][j]]);
+                drawGrid(j + 1, fullRow + 1);
+            }
+        }
+    }
+    
+    void drawFallingBlock() {
+        lazyPrinter.setColor(tetrominoColor[fallingBlock.getKind()]);
+        for (auto [x, y] : fallingBlock.getCoordinates()) drawGrid(x + 1, y + 1);
+    }
+
+    void drawHold() {
+        // hold Border
+        lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT);
+        for (int x = 2; x < MARGIN_WIDTH; x++) {
+            drawGrid(-x, 0);
+            drawGrid(-x, HOLD_BORDER_HEIGHT);
+        }
+
+        // hold Border title
+        lazyPrinter.setXY(MARGIN_WIDTH / 2 * LEN * PIXEL_WIDTH, MARGIN_HEIGHT * LEN * PIXEL_HEIGHT);
+        lazyPrinter.centerAlignedText("- HOLD -");
+
+        // holded Block
+        int hx = -MARGIN_WIDTH / 2 - holdedBlock.getCenterX();
+        int hy = HOLD_BORDER_HEIGHT - 1 - holdedBlock.getMaxY();
+        lazyPrinter.setColor(tetrominoColor[holdedBlock.getKind()]);
+        for (auto [x, y] : holdedBlock.getShape()) drawGrid(x + hx, y + hy);
+    }
+
     void display() {
-        deleteMargin();
+        drawMargin();
         drawBorder();
         drawBoard();
         drawFallingBlock();

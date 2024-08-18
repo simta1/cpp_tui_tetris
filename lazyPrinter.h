@@ -70,7 +70,8 @@ public:
         }
     }
 
-    void text(string st) {
+    void centerAlignedText(string st) {
+        curX -= st.size() / 2;
         for (auto ch : st) lazyPrint(ch);
     }
 
