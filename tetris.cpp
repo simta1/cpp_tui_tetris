@@ -1,6 +1,6 @@
 #include <windows.h>
 #include <conio.h> // _kbhit, _getch
-#include "Game.h"
+#include "game.h"
 
 const char KEYBOARD_ARROW_UP = 72;
 const char KEYBOARD_ARROW_LEFT = 75;
