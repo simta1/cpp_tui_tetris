@@ -3,6 +3,7 @@
 
 #include <bits/stdc++.h>
 #include "coordinate.h"
+#include "rotateDirection.h"
 using namespace std;
 
 const vector<ConsoleColor> tetrominoColor = {
@@ -68,6 +69,10 @@ public:
 
     int getMaxY() {
         return maxY;
+    }
+
+    void rotate(RotateDirection direction) {
+        for (auto &coordinate : shape) coordinate.rotate(direction);
     }
 };
 

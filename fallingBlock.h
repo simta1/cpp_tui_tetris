@@ -3,6 +3,7 @@
 
 #include "tetromino.h"
 #include "move.h"
+#include "rotateDirection.h"
 
 class FallingBlock : public Tetromino {
 private:
@@ -27,6 +28,14 @@ public:
         }
 
         return res;
+    }
+
+    int getX() {
+        return x;
+    }
+
+    int getY() {
+        return x;
     }
 
     void drop() {
@@ -54,15 +63,11 @@ public:
                 break;
 
             case Move::ROTATE_CCW:
-                // TODO
+                rotate(RotateDirection::COUNTERCLOCKWISE);
                 break;
 
             case Move::ROTATE_CW:
-                // TODO
-                break;
-
-            case Move::HARDDROP:
-                // TODO
+                rotate(RotateDirection::CLOCKWISE);
                 break;
         }
     }

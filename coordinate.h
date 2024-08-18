@@ -1,10 +1,7 @@
 #ifndef COORDINATE_H
 #define COORDINATE_H
 
-enum class Direction {
-    COUNTERCLOCKWISE,
-    CLOCKWISE
-};
+#include "rotateDirection.h"
 
 struct Coordinate {
     int x, y;
@@ -17,19 +14,19 @@ struct Coordinate {
         this->y += y;
     }
     
-    void rotate(Direction direction) {
+    void rotate(RotateDirection direction) {
         int tmpX = x;
         int tmpY = y;
 
         switch (direction) {
-            case Direction::CLOCKWISE:
-                x = tmpY;
-                y = -tmpX;
-                break;
-            
-            case Direction::COUNTERCLOCKWISE:
+            case RotateDirection::CLOCKWISE:
                 x = -tmpY;
                 y = tmpX;
+                break;
+            
+            case RotateDirection::COUNTERCLOCKWISE:
+                x = tmpY;
+                y = -tmpX;
                 break;
         }
     }

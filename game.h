@@ -7,6 +7,7 @@
 #include "fallingBlock.h"
 #include "timer.h"
 #include "move.h"
+#include "rotateDirection.h"
 using namespace std;
 
 template <int ROWS, int COLS>
@@ -36,9 +37,16 @@ private:
     bool paused;
     bool gameover;
 
+    void hardDrop() {
+        while (checkFallingBlockCanDrop()) fallingBlock.drop();
+
+        // hard drop 후에는 바로 put되도록 타이머 조정
+        timer_drop.end();
+        timer_hardDropped.init();
+    }
+
     void hold() {
         // TODO
-
     }
 
     void drawGrid(int x, int y) {
@@ -83,6 +91,15 @@ private:
     bool checkFallingBlockCanMove(int dx, int dy) {
         for (auto [x, y] : fallingBlock.getCoordinates()) {
             if (!checkGridCanFill(x + dx, y + dy)) return false;
+        }
+
+        return true;
+    }
+    
+    bool checkFallingBlockCanRotate(RotateDirection direction) {
+        for (Coordinate coordinate : fallingBlock.getShape()) {
+            coordinate.rotate(direction);
+            if (!checkGridCanFill(coordinate.x + fallingBlock.getX(), coordinate.y + fallingBlock.getY())) return false;
         }
 
         return true;
@@ -187,9 +204,6 @@ public:
             for (int j = 0; j < COLS; j++) board[i][j] = 0;
         }
 
-        // falling block
-        makeNewFallingBlock();
-
         fullRows.clear();
 
         // init
@@ -198,6 +212,9 @@ public:
 
         paused = false;
         gameover = false;
+        
+        // falling block
+        makeNewFallingBlock();
     }
 
     void run() {
@@ -230,20 +247,16 @@ public:
                 break;
 
             case Move::ROTATE_CCW:
-                canApply = checkFallingBlockCanRotate();
+                canApply = checkFallingBlockCanRotate(RotateDirection::COUNTERCLOCKWISE);
                 break;
 
             case Move::ROTATE_CW:
-                canApply = checkFallingBlockCanRotate();
+                canApply = checkFallingBlockCanRotate(RotateDirection::CLOCKWISE);
                 break;
 
             case Move::HARDDROP:
-                canApply = true;
-
-                // hard drop 후에는 바로 put되도록 타이머 조정
-                timer_drop.end();
-                timer_hardDropped.init();
-                break;
+                hardDrop();
+                return;
 
             case Move::HOLD:
                 hold();
