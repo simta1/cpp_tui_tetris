@@ -54,7 +54,8 @@ int main() {
 
         game.run();
 
-        Sleep(10);
+        // todo 출력 최적화한 뒤 sleep간격 줄여야 됨
+        Sleep(100);
     }
 
     return 0;
