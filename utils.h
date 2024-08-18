@@ -1,6 +1,5 @@
 #include <iostream>
 #include <windows.h>
-#include <random>
 using namespace std;
 
 // 그림 그리는 기본 단위로 'X' 출력해서 사용
