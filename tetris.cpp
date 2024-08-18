@@ -1,3 +1,4 @@
+#include <windows.h>
 #include <conio.h> // _kbhit, _getch
 #include "Game.h"
 
@@ -53,8 +54,7 @@ int main() {
 
         game.run();
 
-        // TODO sleep 시간 정해야 됨
-        // sleep(__);
+        Sleep(10);
     }
 
     return 0;
