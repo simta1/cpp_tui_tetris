@@ -16,7 +16,8 @@
 - [ ] 테트로미노 관련
     - [X] 7-bag
     - [ ] nextBlocks 보여주기
-    - [ ] ghostBlock 보여주기
+    - [X] ghostBlock 보여주기
+    - [ ] holdedBlocks canHold 여부 보여주기
 
 - [ ] 기타
     - [ ] 플레이시간 보여주기

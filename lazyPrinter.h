@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <windows.h>
-#include "ConsoleColor.h"
+#include "consoleColor.h"
 using namespace std;
 
 const char PIXEL_CHAR = 'X';
@@ -66,6 +66,13 @@ public:
 
         for (int i = 0; i < h; i++) {
             setXY(x * PIXEL_WIDTH, y * PIXEL_HEIGHT + i);
+            for (int _ = w; _--;) lazyPrint(PIXEL_CHAR);
+        }
+    }
+
+    void rectBySubPixel(int x, int y, int w, int h) {
+        for (int i = 0; i < h; i++) {
+            setXY(x, y + i);
             for (int _ = w; _--;) lazyPrint(PIXEL_CHAR);
         }
     }
