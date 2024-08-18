@@ -15,14 +15,17 @@ enum class Move {
 template <int ROWS, int COLS>
 class Game {
 private:
+    // 출력 관련
     const int LEN = 1; // 격자칸의 한 변에 사용될 픽셀 개수
     vector<pair<int, int> > updatedPos; // 0-based // 출력 최적화용. 화면 출력할 때 이전 화면과 달라진 좌표만 출력.
 
+    // 게임 로직 관련
     vector<vector<int> > board;
     vector<pair<int, int> > borderPos; // first : i(=y), second : j(=x)
 
+    // 추가 정보
     int score;
-    int playTime;
+    double playTime;
 
     bool paused;
     bool gameover;
@@ -69,17 +72,34 @@ public:
     }
 
     void start() {
+        // board
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLS; j++) board[i][j] = 0;
+        }
+
+        updatedPos.clear();
+
+        // border
         setColor(ConsoleColor::GRAY);
         for (auto [i, j] : borderPos) drawPixel(i, j);
+
+        // init
+        score = 0;
+        playTime = 0;
+
+        paused = false;
+        gameover = false;
     }
 
     void run() {
+        if (paused) return;
+        
         update();
         display();
     }
 
     void pause() {
-
+        paused ^= 1;
     }
 
     void applyMove(Move move) {
