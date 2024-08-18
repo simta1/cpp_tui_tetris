@@ -11,6 +11,8 @@ const char PIXEL_CHAR = 'X';
 const int PIXEL_WIDTH = 2;
 const int PIXEL_HEIGHT = 1;
 
+const int HARDDROP_EFFECT_PIXEL_LEN = 1;
+
 class LazyPrinter {
 private:
     const int WIDTH;
@@ -23,13 +25,21 @@ private:
         bool operator!=(const Data &other) const { return ch != other.ch || color != other.color; }
     };
 
+    int translateX, translateY;
+
     int curColor;
     int curX, curY;
     vector<vector<Data> > prevConsole, console;
 
     void lazyPrint(char ch) {
+        curX += translateX;
+        curY += translateY;
+
         if (curX >= 0 && curX < WIDTH && curY >= 0 && curY < HEIGHT) console[curX++][curY] = Data{ch, curColor};
         else cerr << "out of bounds at (" << curX << ", " << curY << ")\n";
+
+        curX -= translateX;
+        curY -= translateY;
     }
 
     int convertColorToInt(ConsoleColor color, ConsoleColor bgColor = ConsoleColor::ORIGINALBG) {
@@ -46,13 +56,19 @@ private:
 
 public:
     LazyPrinter(int width, int height) : \
-        WIDTH(width * PIXEL_WIDTH), HEIGHT(height * PIXEL_HEIGHT), \
+        WIDTH(width * PIXEL_WIDTH), HEIGHT(height * PIXEL_HEIGHT + HARDDROP_EFFECT_PIXEL_LEN), \
+        translateX(0), translateY(0), \
         curColor(convertColorToInt(ConsoleColor::WHITE)), curX(0), curY(0), \
         prevConsole(WIDTH, vector<Data>(HEIGHT, {PIXEL_CHAR, curColor})), \
         console(WIDTH, vector<Data>(HEIGHT, {PIXEL_CHAR, curColor})) {}
 
     void setColor(ConsoleColor color, ConsoleColor bgColor = ConsoleColor::ORIGINALBG) {
         curColor = convertColorToInt(color, bgColor);
+    }
+
+    void translate(int tx, int ty) {
+        translateX += tx;
+        translateY += ty;
     }
 
     void setXY(int gx, int gy) {
@@ -88,9 +104,12 @@ public:
                 if (prevConsole[x][y] != console[x][y]) {
                     printOnConsole(x, y, console[x][y].color, console[x][y].ch);
                     prevConsole[x][y] = console[x][y];
+                    console[x][y] = Data{PIXEL_CHAR, convertColorToInt(ConsoleColor::ORIGINALBG)};
                 }
             }
         }
+
+        translateX = translateY = 0;
     }
 
 

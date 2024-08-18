@@ -27,7 +27,6 @@ private:
     static constexpr int MARGIN_HEIGHT = 3; // 보드판 상단에 들어갈 여백 길이(단위 : 격자개수)
     static constexpr int MARGIN_WIDTH = HOLD_BORDER_WIDTH + 2; // 보드판 좌측에 들어갈 여백 길이(단위 : 격자개수)
 
-
     vector<pair<int, int> > borderPos;
 
     LazyPrinter lazyPrinter;
@@ -190,6 +189,7 @@ private:
 
     void drawBorder() {
         lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT, ConsoleColor::BORDER_DEFAULT);
+        // if (!timer_hardDropped.isOver()) lazyPrinter.setColor(ConsoleColor::WHITE, ConsoleColor::WHITE);
         for (auto [i, j] : borderPos) drawGrid(i, j);
     }
 
@@ -249,6 +249,9 @@ private:
     }
 
     void display() {
+        // harddrop 진동효과
+        // if (!timer_hardDropped.isOver()) lazyPrinter.translate(0, HARDDROP_EFFECT_PIXEL_LEN);
+
         drawMargin();
         drawBorder();
         drawBoard();
