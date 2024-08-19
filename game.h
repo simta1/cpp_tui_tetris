@@ -36,7 +36,9 @@ private:
     static constexpr int GAMEINFO_MARGIN = 2;
 
     static constexpr int MIN_ROWS = max(-~HOLD_BORDER_HEIGHT + -~GAMEINFO_MARGIN * 2, HOLD_BORDER_HEIGHT * NEXTBLOCK_COUNT);
-    // static_assert(ROWS >= MIN_ROWS, "게임보드는 최소 " + to_string(MIN_ROWS) + "개의 행을 가져야 합니다.");
+    static constexpr int MIN_COLS = 4; // 테트로미노 최대 길이
+    static_assert(ROWS >= MIN_ROWS, "행 개수 부족");
+    static_assert(ROWS >= MIN_COLS, "열 개수 부족");
 
     // HARDDROP 충격파 효과 관련
     const double HARDDROP_WAVE_VELOCITY = 1;
