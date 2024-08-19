@@ -58,13 +58,29 @@ private:
 public:
     LazyPrinter(int width, int height) : \
         WIDTH(width * PIXEL_WIDTH + 2 * BREAKROW_VIBRATION_LEN), HEIGHT(height * PIXEL_HEIGHT + HARDDROP_VIBRATION_LEN), \
-        translateX(0), translateY(0), \
-        curColor(convertColorToInt(ConsoleColor::WHITE)), curX(0), curY(0), \
+        curColor(convertColorToInt(ConsoleColor::WHITE)), \
         prevConsole(WIDTH, vector<Data>(HEIGHT, {PIXEL_CHAR, curColor})), \
-        console(WIDTH, vector<Data>(HEIGHT, {PIXEL_CHAR, curColor})) {}
+        console(WIDTH, vector<Data>(HEIGHT, {PIXEL_CHAR, curColor})) {
+            init();
+        }
 
     void setColor(ConsoleColor color, ConsoleColor bgColor = ConsoleColor::ORIGINALBG) {
         curColor = convertColorToInt(color, bgColor);
+    }
+
+    void init() {
+        translateX = BREAKROW_VIBRATION_LEN;
+        translateY = 0;
+        curX = curY = 0;
+
+        for (int x = 0; x < WIDTH; x++) {
+            for (int y = 0; y < HEIGHT; y++) {
+                console[x][y] = {PIXEL_CHAR, convertColorToInt(ConsoleColor::ORIGINALBG)};
+
+                // test용 나중에 삭제
+                console[x][y] = {'D', convertColorToInt(ConsoleColor::YELLOW)};
+            }
+        }
     }
 
     void translate(int tx, int ty) {
@@ -105,15 +121,9 @@ public:
                 if (prevConsole[x][y] != console[x][y]) {
                     printOnConsole(x, y, console[x][y].color, console[x][y].ch);
                     prevConsole[x][y] = console[x][y];
-                    
-                    // TODO 제대로 초기화안되는것 같음 확인해볼 필요있음
-                    console[x][y] = Data{PIXEL_CHAR, convertColorToInt(ConsoleColor::ORIGINALBG)};
                 }
             }
         }
-
-        translateX = BREAKROW_VIBRATION_LEN;
-        translateY = 0;
     }
 
 

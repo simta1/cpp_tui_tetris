@@ -20,8 +20,8 @@ const int breakRowAnimationTime = 70;
 const int breakRowVibrationPeriod = breakRowAnimationTime / 2;
 
 //
-const double HARDDROP_EFFECT_VELOCITY = 1.5;
-const int HARDDROP_EFFECT_INSENSITIVITY = 3;
+const double HARDDROP_WAVE_VELOCITY = 1;
+const int HARDDROP_WAVE_INSENSITIVITY = 6;
 
 template <int ROWS, int COLS>
 class Game {
@@ -69,7 +69,7 @@ private:
             ++prevHardDropHeight;
         }
         prevHardDropPosX = fallingBlock.getX() + fallingBlock.getCenterX();
-        prevHardDropPosY = fallingBlock.getY() + fallingBlock.getCenterY();
+        prevHardDropPosY = fallingBlock.getY() + fallingBlock.getMaxY();
 
         // hard drop 후에는 바로 put되도록 타이머 조정
         timer_drop.end();
@@ -205,14 +205,9 @@ private:
         lazyPrinter.rect(0, MARGIN_HEIGHT * LEN, MARGIN_WIDTH * LEN, (ROWS + 2) * LEN);
     }
 
-    int getTaxiDist(int x1, int y1, int x2, int y2) {
-        return abs(x1 - x2) + abs(y1 - y2);
-    }
-
     void drawBorder() {
         for (auto [x, y] : borderPos) {
-            if (hardDropped && getTaxiDist(prevHardDropPosX, ROWS + 1, x, y) < min(int(timer_hardDropped.getTime() * HARDDROP_EFFECT_VELOCITY), prevHardDropHeight / HARDDROP_EFFECT_INSENSITIVITY)) lazyPrinter.setColor(ConsoleColor::WHITE, ConsoleColor::WHITE);
-            else lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT, ConsoleColor::BORDER_DEFAULT);
+            lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT, ConsoleColor::BORDER_DEFAULT);
             drawGrid(x, y);
         }
     }
@@ -220,8 +215,7 @@ private:
     void drawBoard() {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
-                if (hardDropped && board[i][j] && getTaxiDist(prevHardDropPosX, prevHardDropPosY, j, i) < 0.5 * min(int(timer_hardDropped.getTime() * HARDDROP_EFFECT_VELOCITY), prevHardDropHeight / HARDDROP_EFFECT_INSENSITIVITY)) lazyPrinter.setColor(ConsoleColor::WHITE, ConsoleColor::WHITE);
-                else lazyPrinter.setColor(tetrominoColor[board[i][j]], tetrominoColor[board[i][j]]);
+                lazyPrinter.setColor(tetrominoColor[board[i][j]], tetrominoColor[board[i][j]]);
                 drawGrid(j + 1, i + 1);
             }
         }
@@ -274,7 +268,30 @@ private:
         for (auto [x, y] : holdedBlock.getShape()) drawGrid(x + hx, y + hy);
     }
 
+    int getTaxiDist(int x1, int y1, int x2, int y2) {
+        return abs(x1 - x2) + abs(y1 - y2);
+        // return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    }
+
+    void drawHardDropShockWave() {
+        if (!hardDropped || !haveFullRow()) return;
+
+        int harddropWaveMaxDistance = prevHardDropHeight / HARDDROP_WAVE_INSENSITIVITY;
+        if (harddropWaveMaxDistance <= 1) return;
+        
+        int shockwavePos = min(int(timer_hardDropped.getTime() * HARDDROP_WAVE_VELOCITY), harddropWaveMaxDistance);
+
+        lazyPrinter.setColor(ConsoleColor::WHITE, ConsoleColor::WHITE);
+        for (int i = 0; i <= ROWS + 1; i++) {
+            for (int j = 0; j <= COLS + 1; j++) {
+                if (getTaxiDist(prevHardDropPosX, prevHardDropPosY, j, i) == shockwavePos) drawGrid(j + 1, i + 1);
+            }
+        }
+    }
+
     void display() {
+        lazyPrinter.init();
+
         // harddrop 진동효과 (세로)
         // if (!timer_hardDropped.isOver()) lazyPrinter.translate(0, HARDDROP_VIBRATION_LEN);
 
@@ -289,6 +306,7 @@ private:
         drawBoard();
         drawFallingBlock();
         drawHold();
+        drawHardDropShockWave();
 
         lazyPrinter.render();
     }
