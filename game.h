@@ -10,6 +10,7 @@
 #include "timer.h"
 #include "move.h"
 #include "rotateDirection.h"
+#include "userControlKey.h"
 using namespace std;
 
 // ms 기준
@@ -361,8 +362,12 @@ private:
         // gameover, paused 여부
         if (gameover) {
             lazyPrinter.setColor(ConsoleColor::BLACK, ConsoleColor::WHITE);
-            lazyPrinter.setxyByPixel((-~MARGIN_WIDTH + COLS / 2) * LEN, (-~MARGIN_HEIGHT + ROWS / 2) * LEN);
+            lazyPrinter.setxyByPixel((-~MARGIN_WIDTH + COLS / 2) * LEN, (-~MARGIN_HEIGHT + ROWS / 2 - 1) * LEN);
             lazyPrinter.centerAlignedText("GAME OVER");
+
+            lazyPrinter.setColor(ConsoleColor::WHITE, ConsoleColor::BLACK);
+            lazyPrinter.setxyByPixel((-~MARGIN_WIDTH + COLS / 2) * LEN, (-~MARGIN_HEIGHT + ROWS / 2) * LEN);
+            lazyPrinter.centerAlignedText("press " + string(1, KEY_REPLAY_GAME) + " to replay");
         }
         else if (paused) {
             lazyPrinter.setxyByPixel((-~MARGIN_WIDTH + COLS / 2) * LEN, (-~MARGIN_HEIGHT + ROWS / 2) * LEN);
@@ -482,7 +487,7 @@ public:
                 break;
 
             case Move::HARDDROP:
-                hardDrop();
+                if (!haveFullRow()) hardDrop(); // 꽉 찬 열 전부 부서지기 전까진 블럭 설치되면 안됨.
                 return;
 
             case Move::HOLD:

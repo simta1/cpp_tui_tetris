@@ -7,7 +7,8 @@
 #include "consoleColor.h"
 using namespace std;
 
-const char PIXEL_CHAR = 'O';
+const char PIXEL_CHAR_DEFAULT = 'O';
+const char PIXEL_CHAR_DISPLAY_BORDER = '#';
 const int PIXEL_WIDTH = 2;
 const int PIXEL_HEIGHT = 1;
 
@@ -58,9 +59,7 @@ private:
 public:
     LazyPrinter(int width, int height) : \
         WIDTH(width * PIXEL_WIDTH + 2 * BREAKROW_VIBRATION_LEN), HEIGHT(height * PIXEL_HEIGHT + HARDDROP_VIBRATION_LEN), \
-        curColor(convertColorToInt(ConsoleColor::WHITE)), \
-        prevConsole(WIDTH, vector<Data>(HEIGHT, {PIXEL_CHAR, curColor})), \
-        console(WIDTH, vector<Data>(HEIGHT, {PIXEL_CHAR, curColor})) {
+        prevConsole(WIDTH, vector<Data>(HEIGHT)), console(WIDTH, vector<Data>(HEIGHT)) {
             init();
         }
 
@@ -72,14 +71,23 @@ public:
         translateX = BREAKROW_VIBRATION_LEN;
         translateY = 0;
         curX = curY = 0;
+        curColor = convertColorToInt(ConsoleColor::WHITE);
+
+        for (int x = 1; x < WIDTH - 1; x++) {
+            for (int y = 1; y < HEIGHT - 1; y++) {
+                console[x][y] = {PIXEL_CHAR_DEFAULT, convertColorToInt(ConsoleColor::ORIGINALBG)};
+            }
+        }
+                
 
         for (int x = 0; x < WIDTH; x++) {
-            for (int y = 0; y < HEIGHT; y++) {
-                console[x][y] = {PIXEL_CHAR, convertColorToInt(ConsoleColor::ORIGINALBG)};
+            console[x][0] = {'-', convertColorToInt(ConsoleColor::WHITE)};
+            console[x][HEIGHT - 1] = {'-', convertColorToInt(ConsoleColor::WHITE)};
+        }
 
-                // test용 나중에 삭제
-                console[x][y] = {'D', convertColorToInt(ConsoleColor::YELLOW)};
-            }
+        for (int y = 1; y < HEIGHT - 1; y++) {
+            console[0][y] = {'|', convertColorToInt(ConsoleColor::WHITE)};
+            console[WIDTH - 1][y] = {'|', convertColorToInt(ConsoleColor::WHITE)};
         }
     }
 
@@ -103,14 +111,14 @@ public:
 
         for (int i = 0; i < h; i++) {
             setXY(x * PIXEL_WIDTH, y * PIXEL_HEIGHT + i);
-            for (int _ = w; _--;) lazyPrint(PIXEL_CHAR);
+            for (int _ = w; _--;) lazyPrint(PIXEL_CHAR_DEFAULT);
         }
     }
 
     void rectBySubPixel(int x, int y, int w, int h) {
         for (int i = 0; i < h; i++) {
             setXY(x, y + i);
-            for (int _ = w; _--;) lazyPrint(PIXEL_CHAR);
+            for (int _ = w; _--;) lazyPrint(PIXEL_CHAR_DEFAULT);
         }
     }
 
