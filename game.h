@@ -75,6 +75,8 @@ private:
     bool gameover;
 
     void hardDrop() {
+        if (haveFullRow()) breakFullRowsInstantly();
+
         prevHardDropHeight = 0;
         while (checkFallingBlockCanDrop()) {
             fallingBlock.drop();
@@ -174,6 +176,20 @@ private:
 
     void breakFullRow() {
         if (timer_breakRow.isOver()) {
+            int rowToBreak = fullRows.back();
+            fullRows.pop_back();
+
+            for (int col = 0; col < COLS; col++) {
+                for (int row = rowToBreak; row > 0; row--) board[row][col] = board[row - 1][col];
+                board[0][col] = 0;
+            }
+
+            for (auto &fullRow : fullRows) ++fullRow;
+        }
+    }
+
+    void breakFullRowsInstantly() {
+        while (!fullRows.empty()) {
             int rowToBreak = fullRows.back();
             fullRows.pop_back();
 
@@ -487,7 +503,7 @@ public:
                 break;
 
             case Move::HARDDROP:
-                if (!haveFullRow()) hardDrop(); // 꽉 찬 열 전부 부서지기 전까진 블럭 설치되면 안됨.
+                hardDrop();
                 return;
 
             case Move::HOLD:

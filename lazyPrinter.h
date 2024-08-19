@@ -8,7 +8,8 @@
 using namespace std;
 
 const char PIXEL_CHAR_DEFAULT = 'O';
-const char PIXEL_CHAR_DISPLAY_BORDER = '#';
+const char PIXEL_CHAR_BORDER_HORIZONTAL = '-';
+const char PIXEL_CHAR_BORDER_VERTICAL = '|';
 const int PIXEL_WIDTH = 2;
 const int PIXEL_HEIGHT = 1;
 
@@ -86,8 +87,8 @@ public:
         }
 
         for (int y = 1; y < HEIGHT - 1; y++) {
-            console[0][y] = {'|', convertColorToInt(ConsoleColor::WHITE)};
-            console[WIDTH - 1][y] = {'|', convertColorToInt(ConsoleColor::WHITE)};
+            console[0][y] = {PIXEL_CHAR_BORDER_HORIZONTAL, convertColorToInt(ConsoleColor::WHITE)};
+            console[WIDTH - 1][y] = {PIXEL_CHAR_BORDER_VERTICAL, convertColorToInt(ConsoleColor::WHITE)};
         }
     }
 
