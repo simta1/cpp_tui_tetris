@@ -43,7 +43,7 @@ const vector<string> USER_CONTROL_KEYS = {
     "rotateR : " + convertKeyToString(KEY_ROTATE_RIGHT),
     "drop    : " + convertKeyToString(KEY_DROP_HARD),
     "hold    : " + convertKeyToString(KEY_HOlD),
-    "design  : " + convertKeyToString(KEY_CHANGE_THEMA)
+    "thema   : " + convertKeyToString(KEY_CHANGE_THEMA)
 };
 
 constexpr int USER_CONTROL_KEY_COUNT = 9; // replay 제외
