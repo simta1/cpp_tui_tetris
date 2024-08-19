@@ -17,12 +17,14 @@ using namespace std;
 constexpr int sleepTime = 10;
 constexpr int dropTime = 500;
 constexpr int dropTimeLowerLimit = 45;
-constexpr int dropSpeedUpPeriod = 5000;
+constexpr int dropSpeedUpPeriod = 10000;
 constexpr int hardDropAnimationTime = 50;
 constexpr int breakRowAnimationTime = 30;
+constexpr int breakRowFlashDuration = 20;
 constexpr int breakRowVibrationPeriod = breakRowAnimationTime / 2;
 
-static_assert(breakRowVibrationPeriod >= sleepTime, "break Row 애니메이션 길이 부족");
+static_assert(breakRowVibrationPeriod >= sleepTime, "break Row 애니메이션 시간 부족");
+static_assert(breakRowFlashDuration >= sleepTime, "break Row 반짝임 애니메이션 시간 부족");
 
 const double dropSpeedUpRate = 0.9;
 
@@ -294,8 +296,8 @@ private:
         // highlight Full Rows
         for (auto fullRow : fullRows) {
             for (int j = 0; j < COLS; j++) {
-                lazyPrinter.setColor(tetrominoColor[board[fullRow][j]], ConsoleColor::FULL_ROW_HIGHLIGHT);
-                lazyPrinter.setColor(ConsoleColor::FULL_ROW_HIGHLIGHT, tetrominoColor[board[fullRow][j]]);
+                if (timer_breakRow.getTime() / (breakRowFlashDuration / sleepTime) & 1) lazyPrinter.setColor(ConsoleColor::WHITE, ConsoleColor::ORIGINALBG);
+                else lazyPrinter.setColor(tetrominoColor[board[fullRow][j]], ConsoleColor::ORIGINALBG);
                 drawGrid(j + 1, fullRow + 1);
             }
         }

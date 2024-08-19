@@ -51,3 +51,5 @@
 - [X] tui관련 상수들이랑 ROWS 대소관계 static_assert
 - [ ] 애니메이션 시간 관련 상수들 sleepTime보다 큰지 static_assert
 - [ ] border 두께 상수로 선언하기
+
+- [ ] src폴더 만들고 코드관련 파일 전부 집어넣기
