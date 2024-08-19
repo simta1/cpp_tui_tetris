@@ -18,14 +18,14 @@ private:
     random_device rd;
     mt19937 engine;
 
-public:
-    Bag() : origList(N), engine(rd()) {
-        iota(origList.begin(), origList.end(), 1);
-    }
-
     void pack() {
         shuffle(origList.begin(), origList.end(), engine);
         inventory.insert(inventory.end(), origList.begin(), origList.end());
+    }
+
+public:
+    Bag() : origList(N), engine(rd()) {
+        iota(origList.begin(), origList.end(), 1);
     }
 
     int takeOut() {
