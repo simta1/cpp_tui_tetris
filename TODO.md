@@ -15,9 +15,9 @@
     - [X] wall-kick
     ~~- [ ] t-spin~~
 
-- [ ] 테트로미노 관련
+- [X] 테트로미노 관련
     - [X] 7-bag
-    - [ ] nextBlocks 보여주기
+    - [X] nextBlocks 보여주기
     - [X] ghostBlock 보여주기
     - [X] holdedBlocks canHold 여부 보여주기
 
@@ -25,6 +25,7 @@
     - [X] 플레이시간 보여주기
     - [X] 줄 부순 개수 보여주기
     - [X] pause, gameover 문구 표시
+    - [ ] 조작키 보여주기
     - [ ] drop 타이머 보여주기
 
 ### 애니메이션
@@ -47,3 +48,4 @@
 - [ ] draw함수 const 추가. lazyPrinter는 mutable로 선언
 ~~- [ ] const char KEY 사용자 지정 키 중복방지 static_assert~~
 - [X] tui관련 상수들이랑 ROWS 대소관계 static_assert
+- [ ] border 두께 상수로 선언하기

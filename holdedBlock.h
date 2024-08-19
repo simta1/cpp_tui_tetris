@@ -9,7 +9,7 @@ private:
 
 public:
     HoldedBlock() : Tetromino(), activated(false) {}
-    HoldedBlock(int kind) : Tetromino(kind), activated(false) {}
+    explicit HoldedBlock(int kind) : Tetromino(kind), activated(false) {}
     
     void activate() {
         activated = true;
