@@ -22,9 +22,12 @@ constexpr int hardDropAnimationTime = 50;
 constexpr int breakRowAnimationTime = 30;
 constexpr int breakRowFlashDuration = 20;
 constexpr int breakRowVibrationPeriod = breakRowAnimationTime / 2;
+constexpr int rainbowAnimationTime = 2000;
+constexpr int rainbowAnimationMoveDuration = 100;
 
-static_assert(breakRowVibrationPeriod >= sleepTime, "break Row 애니메이션 시간 부족");
-static_assert(breakRowFlashDuration >= sleepTime, "break Row 반짝임 애니메이션 시간 부족");
+static_assert(breakRowVibrationPeriod >= sleepTime, "breakRowVibrationPeriod too small");
+static_assert(breakRowFlashDuration >= sleepTime, "breakRowFlashDuration too small");
+static_assert(rainbowAnimationMoveDuration >= sleepTime, "rainbowAnimationMoveDuration too small");
 
 const double dropSpeedUpRate = 0.9;
 
@@ -74,11 +77,14 @@ private:
     Timer timer_drop;
     Timer timer_hardDropped;
     Timer timer_breakRow;
+    Timer timer_rainbowBorder;
 
     bool hardDropped;
     int prevHardDropHeight;
     int prevHardDropPosX;
     int prevHardDropPosY;
+
+    bool rainbowAnimationOn;
 
     // 추가 정보
     int brokenLines;
@@ -242,20 +248,28 @@ private:
     }
 
     void update() {
-        hardDropped = !timer_hardDropped.isOver();
-
         if (haveFullRow()) breakFullRow();
         else if (timer_drop.isOver()) {
             if (checkFallingBlockCanDrop()) fallingBlock.drop();
             else {
                 if (checkFallingBlockInBorder()) {
-                    brokenLines += putFallingBlock();
+                    int brokenLineCnt = putFallingBlock();
+                    brokenLines += brokenLineCnt;
+                    if (brokenLineCnt >= 3) timer_rainbowBorder.init();
+
                     holdedBlock.activate();
                     makeNewFallingBlock();
                 }
                 else gameover = true;
             }
         }
+
+        hardDropped = !timer_hardDropped.isOver();
+
+        // 무지개 효과.
+        // breakRow 애니메이션이랑 끝난 후 시작
+        // 만약 이미 무지개 효과가 나오는 중이었는데 breakRow로 인해 애니메이션 끊기면 이상하기 때문에 애니메이션 진행 중이었다면 계속 진행
+        rainbowAnimationOn = (!rainbowAnimationOn && haveFullRow()) ? false : !timer_rainbowBorder.isOver();
 
         playTime += sleepTime;
         updateFallingBlockDropSpeed();
@@ -279,9 +293,18 @@ private:
     }
 
     void drawBorder() {
-        for (auto [x, y] : borderPos) {
+        if (rainbowAnimationOn) {
+            for (auto [x, y] : borderPos) {
+                ConsoleColor rainbowColor = getRainbowColor(getTaxiDist(0, 0, x, y) + timer_rainbowBorder.getTime() / (rainbowAnimationMoveDuration / sleepTime));
+                lazyPrinter.setColor(rainbowColor, ConsoleColor::ORIGINALBG);
+                drawGrid(x, y);
+            }
+        }
+        else {
             lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT, ConsoleColor::BORDER_DEFAULT);
-            drawGrid(x, y);
+
+            // lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT, ConsoleColor::ORIGINALBG);
+            for (auto [x, y] : borderPos) drawGrid(x, y);
         }
     }
 
@@ -449,7 +472,8 @@ public:
         board(ROWS, vector<int>(COLS)), lazyPrinter((MARGIN_WIDTH + 1 + COLS + 1 + MARGIN_WIDTH) * LEN * PIXEL_WIDTH + 2 * BREAKROW_VIBRATION_LEN, (MARGIN_HEIGHT + 1 + ROWS + 1) * LEN * PIXEL_HEIGHT + HARDDROP_VIBRATION_LEN), \
         timer_drop(dropTime / sleepTime, true), \
         timer_hardDropped(hardDropAnimationTime / sleepTime, false), \
-        timer_breakRow(breakRowAnimationTime / sleepTime, true) {
+        timer_breakRow(breakRowAnimationTime / sleepTime, true), \
+        timer_rainbowBorder(rainbowAnimationTime / sleepTime, false) {
 
         // border
         borderPos.reserve(ROWS + COLS + 2 << 1);
@@ -483,6 +507,7 @@ public:
         timer_drop.init();
         timer_hardDropped.end();
         timer_breakRow.end();
+        timer_rainbowBorder.end();
 
         // 추가 게임 정보
         brokenLines = 0;

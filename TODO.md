@@ -35,8 +35,8 @@
     - [X] 진동효과
     - [X] 애니메이션 중 harddrop되면 바로 애니메이션 종료
 
-- [ ] replay, start 애니메이션
-    - [ ] border 무지개
+- [X] replay, start 애니메이션
+    - [X] border 무지개
 
 - [X] harddrop 시각효과
     - [X] 색깔 변화 효과
