@@ -46,6 +46,11 @@ public:
         fixed = true;
     }
 
+    void wallKick(int dx, int dy) { // TODO 직접 x, y 바꿀 수 있는 함수는 최대한 만들지 않으려 했는데 wallkick구현하기 귀찮아져서 그냥 사용함 // 나중에 다른방법없을지 생각
+        x += dx;
+        y += dy;
+    }
+
     void applyMove(Move move) {
         if (fixed) return;
 

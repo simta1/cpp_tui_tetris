@@ -104,12 +104,24 @@ private:
     }
     
     bool checkFallingBlockCanRotate(RotateDirection direction) {
-        for (Coordinate coordinate : fallingBlock.getShape()) {
-            coordinate.rotate(direction);
-            if (!checkGridCanFill(coordinate.x + fallingBlock.getX(), coordinate.y + fallingBlock.getY())) return false;
+        // 회전 보정
+        for (auto [dx, dy] : dposWallKick) {
+            bool canRotate = [&]() {
+                for (Coordinate coordinate : fallingBlock.getShape()) {
+                    coordinate.rotate(direction);
+                    if (!checkGridCanFill(coordinate.x + fallingBlock.getX() + dx, coordinate.y + fallingBlock.getY() + dy)) return false;
+                }
+
+                return true;
+            }();
+
+            if (canRotate) {
+                fallingBlock.wallKick(dx, dy);
+                return true;
+            }
         }
 
-        return true;
+        return false;
     }
     
     bool checkFallingBlockCanDrop() {

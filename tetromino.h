@@ -17,6 +17,17 @@ const vector<ConsoleColor> tetrominoColor = {
     ConsoleColor::DARKYELLOW
 };
 
+const vector<pair<int, int> > dposWallKick = {
+    {0, 0},
+    {-1, 0},
+    {1, 0},
+    {-2, 0},
+    {2, 0},
+    {0, -1},
+    {0, -2},
+    {0, -3}
+};
+
 class Tetromino {
 private:
     static constexpr int tetrominoShapes[8][4][2] = {
