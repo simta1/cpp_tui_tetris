@@ -19,15 +19,13 @@ const int hardDropAnimationTime = 150;
 const int breakRowAnimationTime = 70;
 const int breakRowVibrationPeriod = breakRowAnimationTime / 2;
 
-//
-const double HARDDROP_WAVE_VELOCITY = 1;
-const int HARDDROP_WAVE_INSENSITIVITY = 6;
-
 template <int ROWS, int COLS>
 class Game {
 private:
-    // 출력 관련
-    static constexpr int LEN = 1; // 격자칸의 한 변에 사용될 픽셀 개수
+    // 격자칸 한 변에 사용할 픽셀 개수
+    static constexpr int LEN = 1;
+
+    // TUI 길이 (단위 : 격자개수)
     static constexpr int HOLD_BORDER_WIDTH = 6;
     static constexpr int HOLD_BORDER_HEIGHT = 4;
     static constexpr int MARGIN_HEIGHT = 3; // 보드판 상단에 들어갈 여백 길이(단위 : 격자개수)
@@ -35,6 +33,10 @@ private:
     static constexpr int GAMEINFO_MARGIN = 2;
 
     static_assert(ROWS >= -~HOLD_BORDER_HEIGHT + -~GAMEINFO_MARGIN * 2);
+
+    //
+    const double HARDDROP_WAVE_VELOCITY = 1;
+    const int HARDDROP_WAVE_INSENSITIVITY = 6;
 
     vector<pair<int, int> > borderPos;
 
@@ -45,6 +47,8 @@ private:
     vector<int> fullRows;
     
     Bag<7> bag;
+    const int NEXTBLOCK_COUNT = 3;
+    queue<Tetromino> nextBlocks;
     FallingBlock fallingBlock;
     HoldedBlock holdedBlock;
 
@@ -187,7 +191,13 @@ private:
     }
 
     void makeNewFallingBlock(int kind=0) {
-        if (!kind) kind = bag.takeOut();
+        if (!kind) {
+            assert (!nextBlocks.empty());
+            kind = nextBlocks.front().getKind();
+            nextBlocks.pop();
+            nextBlocks.push(Tetromino(bag.takeOut()));
+        }
+
         fallingBlock = FallingBlock(kind, COLS / 2);
         timer_drop.init();
     }
@@ -380,6 +390,8 @@ public:
 
         // tetromino 관련
         bag.clear();
+        while (!nextBlocks.empty()) nextBlocks.pop();
+        for (int i = 0; i < NEXTBLOCK_COUNT; i++) nextBlocks.push(Tetromino(bag.takeOut()));
         makeNewFallingBlock();
         holdedBlock = HoldedBlock();
 
