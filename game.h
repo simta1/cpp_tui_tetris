@@ -571,6 +571,9 @@ public:
         }
     }
     
+    void changeThema() {
+        lazyPrinter.changeThema();
+    }
 };
 
 #endif

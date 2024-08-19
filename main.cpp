@@ -33,6 +33,7 @@ int main() {
             else if (key == KEY_DROP_SOFT) game.applyMove(Move::DOWN);
             else if (key == KEY_DROP_HARD) game.applyMove(Move::HARDDROP);
             else if (key == KEY_HOlD) game.applyMove(Move::HOLD);
+            else if (key == KEY_CHANGE_THEMA) game.changeThema();
         }
 
         game.run();

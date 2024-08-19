@@ -8,6 +8,7 @@
 using namespace std;
 
 const char PIXEL_CHAR_DEFAULT = 'O';
+const char PIXEL_CHAR_FULL = '@';
 const char PIXEL_CHAR_BORDER_HORIZONTAL = '-';
 const char PIXEL_CHAR_BORDER_VERTICAL = '|';
 const int PIXEL_WIDTH = 2;
@@ -15,9 +16,6 @@ const int PIXEL_HEIGHT = 1;
 
 class LazyPrinter {
 private:
-    const int WIDTH;
-    const int HEIGHT;
-
     struct Data {
         char ch;
         int color;
@@ -25,9 +23,14 @@ private:
         bool operator!=(const Data &other) const { return ch != other.ch || color != other.color; }
     };
 
-    int translateX, translateY;
+    const int WIDTH;
+    const int HEIGHT;
 
+    bool thema;
+
+    char curChar;
     int curColor;
+    int translateX, translateY;
     int curX, curY;
     vector<vector<Data> > prevConsole, console;
 
@@ -36,7 +39,6 @@ private:
         curY += translateY;
 
         if (curX >= 0 && curX < WIDTH && curY >= 0 && curY < HEIGHT) console[curX++][curY] = Data{ch, curColor};
-        // else cerr << "out of bounds at (" << curX << ", " << curY << ")\n";
 
         curX -= translateX;
         curY -= translateY;
@@ -59,11 +61,19 @@ public:
         WIDTH(width), HEIGHT(height), \
         prevConsole(WIDTH, vector<Data>(HEIGHT)), console(WIDTH, vector<Data>(HEIGHT)) {
 
+        thema = 0;
         init();
     }
 
     void setColor(ConsoleColor color, ConsoleColor bgColor = ConsoleColor::ORIGINALBG) {
+        curChar = PIXEL_CHAR_DEFAULT;
         curColor = convertColorToInt(color, bgColor);
+        
+        
+        if (thema && color == bgColor) {
+            curColor = convertColorToInt(color, ConsoleColor::ORIGINALBG);
+            curChar = PIXEL_CHAR_FULL;
+        }
     }
 
     void init() {
@@ -77,7 +87,6 @@ public:
                 console[x][y] = {PIXEL_CHAR_DEFAULT, convertColorToInt(ConsoleColor::ORIGINALBG)};
             }
         }
-                
 
         for (int x = 0; x < WIDTH; x++) {
             console[x][0] = {'-', convertColorToInt(ConsoleColor::WHITE)};
@@ -88,6 +97,10 @@ public:
             console[0][y] = {PIXEL_CHAR_BORDER_HORIZONTAL, convertColorToInt(ConsoleColor::WHITE)};
             console[WIDTH - 1][y] = {PIXEL_CHAR_BORDER_VERTICAL, convertColorToInt(ConsoleColor::WHITE)};
         }
+    }
+
+    void changeThema() {
+        thema ^= 1;
     }
 
     void translate(int tx, int ty) {
@@ -110,14 +123,14 @@ public:
 
         for (int i = 0; i < h; i++) {
             setXY(x * PIXEL_WIDTH, y * PIXEL_HEIGHT + i);
-            for (int _ = w; _--;) lazyPrint(PIXEL_CHAR_DEFAULT);
+            for (int _ = w; _--;) lazyPrint(curChar);
         }
     }
 
     void rectBySubPixel(int x, int y, int w, int h) {
         for (int i = 0; i < h; i++) {
             setXY(x, y + i);
-            for (int _ = w; _--;) lazyPrint(PIXEL_CHAR_DEFAULT);
+            for (int _ = w; _--;) lazyPrint(curChar);
         }
     }
 
@@ -140,8 +153,6 @@ public:
             }
         }
     }
-
-
 };
 
 #endif

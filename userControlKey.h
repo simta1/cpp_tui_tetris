@@ -19,6 +19,7 @@ const char KEY_ROTATE_LEFT = KEYBOARD_ARROW_LEFT;
 const char KEY_ROTATE_RIGHT = KEYBOARD_ARROW_RIGHT;
 const char KEY_DROP_HARD = KEYBOARD_ARROW_UP;
 const char KEY_HOlD = ' ';
+const char KEY_CHANGE_THEMA = 't';
 // --------------------------------------------------------------------------------------------------------------------------------
 
 string convertKeyToString(char key) {
@@ -41,9 +42,10 @@ const vector<string> USER_CONTROL_KEYS = {
     "rotateL : " + convertKeyToString(KEY_ROTATE_LEFT),
     "rotateR : " + convertKeyToString(KEY_ROTATE_RIGHT),
     "drop    : " + convertKeyToString(KEY_DROP_HARD),
-    "hold    : " + convertKeyToString(KEY_HOlD)
+    "hold    : " + convertKeyToString(KEY_HOlD),
+    "design  : " + convertKeyToString(KEY_CHANGE_THEMA)
 };
 
-constexpr int USER_CONTROL_KEY_COUNT = 8; // replay 제외
+constexpr int USER_CONTROL_KEY_COUNT = 9; // replay 제외
 
 #endif
