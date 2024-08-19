@@ -69,27 +69,27 @@ public:
         init();
     }
     
-    int getKind() {
+    int getKind() const {
         return kind;
     }
 
-    vector<Coordinate> getShape() {
+    vector<Coordinate> getShape() const {
         return shape;
     }
     
-    int getCenterX() {
+    int getCenterX() const {
         return minX + maxX + 1 >> 1;
     }
 
-    int getCenterY() {
+    int getCenterY() const {
         return minY + maxY + 1 >> 1;
     }
 
-    int getMinY() {
+    int getMinY() const {
         return minY;
     }
 
-    int getMaxY() {
+    int getMaxY() const {
         return maxY;
     }
 

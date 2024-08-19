@@ -15,7 +15,7 @@ public:
         activated = true;
     }
     
-    bool canHold() {
+    bool canHold() const {
         return activated;
     }
 };

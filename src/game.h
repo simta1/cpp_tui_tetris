@@ -63,7 +63,7 @@ private:
 
     vector<pair<int, int> > borderPos;
 
-    LazyPrinter lazyPrinter;
+    mutable LazyPrinter lazyPrinter;
 
     // 게임 로직 관련
     vector<vector<int> > board;
@@ -117,18 +117,18 @@ private:
         }
     }
 
-    bool inRange(int x, int y) {
+    bool inRange(int x, int y) const {
         return x >= 0 && x < COLS && y >= 0 && y < ROWS;
     }
 
-    bool checkGridCanFill(int x, int y) {
+    bool checkGridCanFill(int x, int y) const {
         if (y < 0) return (x >= 0 && x < COLS);
 
         if (!inRange(x, y)) return false;
         return board[y][x] == 0;
     }
 
-    bool checkFallingBlockCanMove(int dx, int dy) {
+    bool checkFallingBlockCanMove(int dx, int dy) const {
         for (auto [x, y] : fallingBlock.getCoordinates()) {
             if (!checkGridCanFill(x + dx, y + dy)) return false;
         }
@@ -157,17 +157,17 @@ private:
         return false;
     }
     
-    bool checkFallingBlockCanDrop() {
+    bool checkFallingBlockCanDrop() const {
         return checkFallingBlockCanMove(0, 1);
     }
 
-    int howFarCanDrop() {
+    int howFarCanDrop() const {
         int dy = 0;
         while (checkFallingBlockCanMove(0, dy + 1)) ++dy;
         return dy;
     }
 
-    bool checkFallingBlockInBorder() {
+    bool checkFallingBlockInBorder() const {
         for (auto [x, y] : fallingBlock.getCoordinates()) {
             if (y < 0) return false;
         }
@@ -175,7 +175,7 @@ private:
         return true;
     }
 
-    bool checkRowFull(int row) {
+    bool checkRowFull(int row) const {
         for (int col = 0; col < COLS; col++) {
             if (board[row][col] == 0) return false;
         }
@@ -189,7 +189,7 @@ private:
         }
     }
 
-    bool haveFullRow() {
+    bool haveFullRow() const {
         return !fullRows.empty();
     }
 
@@ -275,11 +275,11 @@ private:
         updateFallingBlockDropSpeed();
     }
 
-    void drawGrid(int x, int y) {
+    void drawGrid(int x, int y) const {
         lazyPrinter.rect((MARGIN_WIDTH + x) * LEN, (MARGIN_HEIGHT + y) * LEN, LEN, LEN);
     }
 
-    void drawMargin() {
+    void drawMargin() const {
         lazyPrinter.setColor(ConsoleColor::ORIGINALBG);
         
         // board 상단
@@ -292,7 +292,7 @@ private:
         lazyPrinter.rect((MARGIN_WIDTH + COLS + 2) * LEN, MARGIN_HEIGHT * LEN, MARGIN_WIDTH * LEN, (ROWS + 2) * LEN);
     }
 
-    void drawBorder() {
+    void drawBorder() const {
         if (rainbowAnimationOn) {
             for (auto [x, y] : borderPos) {
                 ConsoleColor rainbowColor = getRainbowColor(getTaxiDist(0, 0, x, y) + timer_rainbowBorder.getTime() / (rainbowAnimationMoveDuration / sleepTime));
@@ -302,13 +302,11 @@ private:
         }
         else {
             lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT, ConsoleColor::BORDER_DEFAULT);
-
-            // lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT, ConsoleColor::ORIGINALBG);
             for (auto [x, y] : borderPos) drawGrid(x, y);
         }
     }
 
-    void drawBoard() {
+    void drawBoard() const {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
                 lazyPrinter.setColor(tetrominoColor[board[i][j]], tetrominoColor[board[i][j]]);
@@ -326,7 +324,7 @@ private:
         }
     }
     
-    void drawFallingBlock() {
+    void drawFallingBlock() const {
         // shadow
         int depth = howFarCanDrop();
         lazyPrinter.setColor(tetrominoColor[fallingBlock.getKind()]);
@@ -337,12 +335,12 @@ private:
         for (auto [x, y] : fallingBlock.getCoordinates()) drawGrid(x + 1, y + 1);
     }
 
-    string getBorderString(string st="") {
+    string getBorderString(string st="") const {
         int len = HOLD_BORDER_WIDTH * PIXEL_WIDTH - st.size() >> 1;
         return string(len, '-') + st + string(len, '-');
     }
 
-    void drawHoldedBlock() {
+    void drawHoldedBlock() const {
         // holdedBlock title
         lazyPrinter.setColor(ConsoleColor::ORIGINAL_FONT);
         lazyPrinter.setxyByPixel(MARGIN_WIDTH / 2 * LEN, MARGIN_HEIGHT * LEN);
@@ -362,7 +360,7 @@ private:
         for (auto [x, y] : holdedBlock.getShape()) drawGrid(x + hx, y + hy);
     }
 
-    void drawNextBlocks() {
+    void drawNextBlocks() const {
         // nextBlocks title
         lazyPrinter.setColor(ConsoleColor::ORIGINAL_FONT);
         lazyPrinter.setxyByPixel(MARGIN_WIDTH + COLS + 2 + MARGIN_WIDTH / 2 * LEN, MARGIN_HEIGHT * LEN);
@@ -383,12 +381,12 @@ private:
         }
     }
 
-    int getTaxiDist(int x1, int y1, int x2, int y2) {
+    int getTaxiDist(int x1, int y1, int x2, int y2) const {
         return abs(x1 - x2) + abs(y1 - y2);
         // return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
-    void drawHardDropShockWave() {
+    void drawHardDropShockWave() const {
         if (!hardDropped || !haveFullRow()) return;
 
         int harddropWaveMaxDistance = prevHardDropHeight / HARDDROP_WAVE_INSENSITIVITY;
@@ -404,7 +402,7 @@ private:
         }
     }
 
-    void drawGameInfo() {
+    void drawGameInfo() const {
         lazyPrinter.setColor(ConsoleColor::ORIGINAL_FONT);
 
         // broken lines
@@ -437,22 +435,23 @@ private:
         }
     }
 
-    void drawManual() {
+    void drawManual() const {
         for (int i = 0; i < USER_CONTROL_KEYS.size(); i++) {
             lazyPrinter.setxyByPixel(LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT + 2 * GAMEINFO_MARGIN + 2 + GAMEINFO_MARGIN + i) * LEN);
             lazyPrinter.leftAlignedText(USER_CONTROL_KEYS[i]);
         }
     }
 
-    void display() {
+    void display() const {
         lazyPrinter.init();
 
-        // breakRow 진동효과 (가로)
+        // breakRow 진동효과
+        int vibrate = 1;
         if (haveFullRow()) {
-            int dir = 2 * (timer_breakRow.getTime() / (breakRowVibrationPeriod / sleepTime) % 2);
-            lazyPrinter.translate(dir * BREAKROW_VIBRATION_LEN, 0);
+            if (timer_breakRow.getTime() / (breakRowVibrationPeriod / sleepTime) & 1) vibrate += 1;
+            else vibrate -= 1;
         }
-        else lazyPrinter.translate(BREAKROW_VIBRATION_LEN, 0);
+        lazyPrinter.translate(vibrate * BREAKROW_VIBRATION_LEN, 0);
 
         drawMargin();
         drawBorder();

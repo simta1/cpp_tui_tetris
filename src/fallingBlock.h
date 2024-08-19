@@ -20,7 +20,7 @@ public:
     }
 
     // shape(상대좌표)에 현재 fallingBlock의 좌표만큼 평행이동시킨 절대좌표 리턴
-    vector<Coordinate> getCoordinates() {
+    vector<Coordinate> getCoordinates() const {
         vector<Coordinate> res = getShape();
         for (auto &[cx, cy] : res) {
             cx += x;
@@ -30,11 +30,11 @@ public:
         return res;
     }
 
-    int getX() {
+    int getX() const {
         return x;
     }
 
-    int getY() {
+    int getY() const {
         return y;
     }
 

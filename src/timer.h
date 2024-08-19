@@ -31,7 +31,7 @@ public:
         return true;
     }
     
-    int getTime() {
+    int getTime() const {
         return elapsedTime;
     }
 
