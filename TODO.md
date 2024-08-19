@@ -17,25 +17,23 @@
 
 - [X] 테트로미노 관련
     - [X] 7-bag
-    - [X] nextBlocks 보여주기
-    - [X] ghostBlock 보여주기
-    - [X] holdedBlocks canHold 여부 보여주기
+    - [X] nextBlocks
+    - [X] ghostBlock
 
 - [ ] 게임 정보 표시
+    - [X] holdedBlocks canHold 여부 보여주기
     - [X] 플레이시간 보여주기
     - [X] 줄 부순 개수 보여주기
     - [X] pause, gameover 문구 표시
     - [X] 조작법 보여주기
     - [ ] drop 타이머 보여주기
 
-- [X] break row 애니메이션 중 harddrop되면 바로 애니메이션 끝내기
-
 ### 애니메이션
-- [ ] break Full Row 관련
+- [X] break Full Row 관련
     - [X] 여러줄 꽉찼을 때 하나씩 부수기
     - [X] 꽉찬줄 하이라이트
-    ~~- [ ] perfect clear 시각효과(무지개?)~~
     - [X] 진동효과
+    - [X] 애니메이션 중 harddrop되면 바로 애니메이션 종료
 
 - [ ] replay, start 애니메이션
     - [ ] border 무지개

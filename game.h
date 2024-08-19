@@ -16,7 +16,7 @@ using namespace std;
 // ms 기준
 const int sleepTime = 10;
 const int dropTime = 500;
-const int hardDropAnimationTime = 150;
+const int hardDropAnimationTime = 100;
 const int breakRowAnimationTime = 70;
 const int breakRowVibrationPeriod = breakRowAnimationTime / 2;
 
@@ -43,7 +43,7 @@ private:
     static_assert(HOLD_BORDER_WIDTH >= TETROMINO_MAX_WIDTH, "공백 길이 부족");
 
     // HARDDROP 충격파 효과 관련
-    const double HARDDROP_WAVE_VELOCITY = 1;
+    const double HARDDROP_WAVE_VELOCITY = 1.5;
     const int HARDDROP_WAVE_INSENSITIVITY = 6;
 
     vector<pair<int, int> > borderPos;
