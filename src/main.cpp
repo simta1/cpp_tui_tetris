@@ -37,8 +37,6 @@ int main() {
         }
 
         game.run();
-
-        Sleep(sleepTime);
     }
 
     return 0;

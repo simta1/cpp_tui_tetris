@@ -13,85 +13,92 @@
 #include "userControlKey.h"
 using namespace std;
 
-// ms 기준
-constexpr int sleepTime = 10;
-constexpr int dropTime = 500;
-constexpr int dropTimeLowerLimit = 45;
-constexpr int dropSpeedUpPeriod = 10000;
-constexpr int hardDropAnimationTime = 50;
-constexpr int breakRowAnimationTime = 30;
-constexpr int breakRowFlashDuration = 20;
-constexpr int breakRowVibrationPeriod = breakRowAnimationTime / 2;
-constexpr int rainbowAnimationTime = 2000;
-constexpr int rainbowAnimationMoveDuration = 100;
-
-static_assert(breakRowVibrationPeriod >= sleepTime, "breakRowVibrationPeriod too small");
-static_assert(breakRowFlashDuration >= sleepTime, "breakRowFlashDuration too small");
-static_assert(rainbowAnimationMoveDuration >= sleepTime, "rainbowAnimationMoveDuration too small");
-
-const double dropSpeedUpRate = 0.9;
-
 template <int ROWS, int COLS>
 class Game {
 private:
-    // nextBlocks 개수
-    static constexpr int NEXTBLOCK_COUNT = 5;
+    // 게임 로직 관련 상수
+        static constexpr int NEXTBLOCK_COUNT = 5;
 
-    // 격자칸 한 변에 사용할 픽셀 개수
-    static constexpr int LEN = 1;
+    // 출력 관련 상수
 
-    // TUI 길이 (단위 : 격자개수)
-    static constexpr int HOLD_BORDER_WIDTH = 8;
-    static constexpr int HOLD_BORDER_HEIGHT = 4;
-    static constexpr int MARGIN_HEIGHT = 3; // 보드판 상단 여백 길이
-    static constexpr int MARGIN_WIDTH = HOLD_BORDER_WIDTH + 2; // 보드판 좌측 여백 길이
-    static constexpr int GAMEINFO_MARGIN = 2;
+        // 진동효과 세기 (단위 : pixel 개수)
+        static constexpr int HARDDROP_VIBRATION_LEN = 1;
+        static constexpr int BREAKROW_VIBRATION_LEN = 1;
 
-    static constexpr int MIN_ROWS = max(HOLD_BORDER_HEIGHT + GAMEINFO_MARGIN * 2 + 2 + GAMEINFO_MARGIN + USER_CONTROL_KEY_COUNT, HOLD_BORDER_HEIGHT * NEXTBLOCK_COUNT) - 2;
-    static constexpr int TETROMINO_MAX_WIDTH = 4; // 테트로미노 최대 길이
-    static_assert(ROWS >= MIN_ROWS, "행 개수 부족");
-    static_assert(COLS >= TETROMINO_MAX_WIDTH, "열 개수 부족");
-    static_assert(HOLD_BORDER_WIDTH >= TETROMINO_MAX_WIDTH, "공백 길이 부족");
+        // 격자칸 한 변에 사용할 픽셀 개수
+        static constexpr int LEN = 1;
 
-    // 단위 : pixel 개수
-    static constexpr int HARDDROP_VIBRATION_LEN = 1;
-    static constexpr int BREAKROW_VIBRATION_LEN = 1;
+        // UI 크기 (단위 : 격자개수)
+        static constexpr int HOLD_BORDER_WIDTH = 8;
+        static constexpr int HOLD_BORDER_HEIGHT = 4;
+        static constexpr int MARGIN_HEIGHT = 3; // 보드판 상단 여백 길이
+        static constexpr int MARGIN_WIDTH = HOLD_BORDER_WIDTH + 2; // 보드판 좌측 여백 길이
+        static constexpr int GAMEINFO_MARGIN = 2;
 
-    // HARDDROP 충격파 효과 관련
-    const double HARDDROP_WAVE_VELOCITY = 1.5;
-    const int HARDDROP_WAVE_INSENSITIVITY = 6;
+        static constexpr int MIN_ROWS = max(HOLD_BORDER_HEIGHT + GAMEINFO_MARGIN * 2 + 2 + GAMEINFO_MARGIN + USER_CONTROL_KEY_COUNT, HOLD_BORDER_HEIGHT * NEXTBLOCK_COUNT) - 2;
+        static constexpr int TETROMINO_MAX_WIDTH = 4; // 테트로미노 최대 길이
+        static_assert(ROWS >= MIN_ROWS, "행 개수 부족");
+        static_assert(COLS >= TETROMINO_MAX_WIDTH, "열 개수 부족");
+        static_assert(HOLD_BORDER_WIDTH >= TETROMINO_MAX_WIDTH, "공백 길이 부족");
 
-    vector<pair<int, int> > borderPos;
+        // HARDDROP 충격파효과
+        static constexpr double HARDDROP_WAVE_VELOCITY = 1.5;
+        static constexpr int HARDDROP_WAVE_INSENSITIVITY = 6;
 
-    mutable LazyPrinter lazyPrinter;
+        // 애니메이션 시간 (단위 : ms)
+        static constexpr int sleepDuration = 10;
+        static constexpr int dropTime = 500;
+        static constexpr int dropTimeLowerLimit = 45;
+        static constexpr int dropSpeedUpPeriod = 10000;
+        static constexpr int hardDropAnimationDuration = 50;
+        static constexpr int breakRowAnimationDuration = 30;
+        static constexpr int breakRowFlashDuration = 20;
+        static constexpr int breakRowVibrationPeriod = breakRowAnimationDuration / 2;
+        static constexpr int rainbowAnimationDuration = 2000;
+        static constexpr int rainbowAnimationMoveDuration = 100;
 
-    // 게임 로직 관련
-    vector<vector<int> > board;
-    vector<int> fullRows;
-    
-    Bag<7> bag;
-    deque<Tetromino> nextBlocks; // queue로만 쓸 거긴 한데 인덱싱 필요해서 덱으로 사용
-    FallingBlock fallingBlock;
-    HoldedBlock holdedBlock;
+        static_assert(breakRowVibrationPeriod >= sleepDuration, "breakRowVibrationPeriod too small");
+        static_assert(breakRowFlashDuration >= sleepDuration, "breakRowFlashDuration too small");
+        static_assert(rainbowAnimationMoveDuration >= sleepDuration, "rainbowAnimationMoveDuration too small");
 
-    Timer timer_drop;
-    Timer timer_hardDropped;
-    Timer timer_breakRow;
-    Timer timer_rainbowBorder;
+        // 테트로미노 떨어지는 시간간격 감소 비율
+        static constexpr double dropSpeedUpRate = 0.9;
 
-    bool hardDropped;
-    int prevHardDropHeight;
-    int prevHardDropPosX;
-    int prevHardDropPosY;
+    // board 관련
+        vector<vector<int> > board;
+        vector<int> fullRows;
+        vector<pair<int, int> > borderPos;
 
-    bool rainbowAnimationOn;
+    // tetromino 관련
+        Bag<7> bag;
+        deque<Tetromino> nextBlocks; // queue로만 쓸 거긴 한데 인덱싱 필요해서 덱으로 사용
+        FallingBlock fallingBlock;
+        HoldedBlock holdedBlock;
 
-    // 추가 정보
-    int brokenLines;
-    int playTime;
+    // timer
+        Timer timer_drop;
+        Timer timer_hardDropped;
+        Timer timer_breakRow;
+        Timer timer_rainbowBorder;
 
-    bool paused;
-    bool gameover;
+    // 게임 정보
+        int brokenLines;
+        int playTime;
+
+        bool paused;
+        bool gameover;
+
+    // printer // 콘솔창 출력 담당
+        mutable LazyPrinter lazyPrinter;
+
+    // harddrop 애니메이션 관련
+        bool hardDropped;
+        int prevHardDropHeight;
+        int prevHardDropPosX;
+        int prevHardDropPosY;
+
+    // 무지개 애니메이션 관련
+        bool rainbowAnimationOn;
 
     void hardDrop() {
         if (haveFullRow()) breakFullRowsInstantly();
@@ -221,7 +228,7 @@ private:
         }
     }
 
-    int putFallingBlock() { // 꽉 차있는 줄 개수 리턴
+    int putFallingBlock() { // 꽉 찬 줄 개수 리턴
         int kind = fallingBlock.getKind();
         for (auto [x, y] : fallingBlock.getCoordinates()) board[y][x] = kind;
         fallingBlock.put();
@@ -244,7 +251,7 @@ private:
     }
 
     void updateFallingBlockDropSpeed() {
-        if (dropSpeedUpPeriod < sleepTime || (playTime / sleepTime) % (dropSpeedUpPeriod / sleepTime) == 0) timer_drop.speedUp(dropSpeedUpRate, dropTimeLowerLimit / sleepTime);
+        if (dropSpeedUpPeriod < sleepDuration || (playTime / sleepDuration) % (dropSpeedUpPeriod / sleepDuration) == 0) timer_drop.speedUp(dropSpeedUpRate, dropTimeLowerLimit / sleepDuration);
     }
 
     void update() {
@@ -271,7 +278,7 @@ private:
         // 만약 이미 무지개 효과가 나오는 중이었는데 breakRow로 인해 애니메이션 끊기면 이상하기 때문에 애니메이션 진행 중이었다면 계속 진행
         rainbowAnimationOn = (!rainbowAnimationOn && haveFullRow()) ? false : !timer_rainbowBorder.isOver();
 
-        playTime += sleepTime;
+        playTime += sleepDuration;
         updateFallingBlockDropSpeed();
     }
 
@@ -295,7 +302,7 @@ private:
     void drawBorder() const {
         if (rainbowAnimationOn) {
             for (auto [x, y] : borderPos) {
-                ConsoleColor rainbowColor = getRainbowColor(getTaxiDist(0, 0, x, y) + timer_rainbowBorder.getTime() / (rainbowAnimationMoveDuration / sleepTime));
+                ConsoleColor rainbowColor = getRainbowColor(getTaxiDist(0, 0, x, y) + timer_rainbowBorder.getTime() / (rainbowAnimationMoveDuration / sleepDuration));
                 lazyPrinter.setColor(rainbowColor, ConsoleColor::ORIGINALBG);
                 drawGrid(x, y);
             }
@@ -317,7 +324,7 @@ private:
         // highlight Full Rows
         for (auto fullRow : fullRows) {
             for (int j = 0; j < COLS; j++) {
-                if (timer_breakRow.getTime() / (breakRowFlashDuration / sleepTime) & 1) lazyPrinter.setColor(ConsoleColor::WHITE, ConsoleColor::ORIGINALBG);
+                if (timer_breakRow.getTime() / (breakRowFlashDuration / sleepDuration) & 1) lazyPrinter.setColor(ConsoleColor::WHITE, ConsoleColor::ORIGINALBG);
                 else lazyPrinter.setColor(tetrominoColor[board[fullRow][j]], ConsoleColor::ORIGINALBG);
                 drawGrid(j + 1, fullRow + 1);
             }
@@ -448,7 +455,7 @@ private:
         // breakRow 진동효과
         int vibrate = 1;
         if (haveFullRow()) {
-            if (timer_breakRow.getTime() / (breakRowVibrationPeriod / sleepTime) & 1) vibrate += 1;
+            if (timer_breakRow.getTime() / (breakRowVibrationPeriod / sleepDuration) & 1) vibrate += 1;
             else vibrate -= 1;
         }
         lazyPrinter.translate(vibrate * BREAKROW_VIBRATION_LEN, 0);
@@ -469,10 +476,10 @@ private:
 public:
     Game() : \
         board(ROWS, vector<int>(COLS)), lazyPrinter((MARGIN_WIDTH + 1 + COLS + 1 + MARGIN_WIDTH) * LEN * PIXEL_WIDTH + 2 * BREAKROW_VIBRATION_LEN, (MARGIN_HEIGHT + 1 + ROWS + 1) * LEN * PIXEL_HEIGHT + HARDDROP_VIBRATION_LEN), \
-        timer_drop(dropTime / sleepTime, true), \
-        timer_hardDropped(hardDropAnimationTime / sleepTime, false), \
-        timer_breakRow(breakRowAnimationTime / sleepTime, true), \
-        timer_rainbowBorder(rainbowAnimationTime / sleepTime, false) {
+        timer_drop(dropTime / sleepDuration, true), \
+        timer_hardDropped(hardDropAnimationDuration / sleepDuration, false), \
+        timer_breakRow(breakRowAnimationDuration / sleepDuration, true), \
+        timer_rainbowBorder(rainbowAnimationDuration / sleepDuration, false) {
 
         // border
         borderPos.reserve(ROWS + COLS + 2 << 1);
@@ -518,6 +525,8 @@ public:
     void run() {
         if (!paused && !gameover) update();
         display();
+
+        Sleep(sleepDuration);
     }
 
     void pause() {
