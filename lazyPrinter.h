@@ -88,9 +88,13 @@ public:
         translateY += ty;
     }
 
-    void setXY(int gx, int gy) {
+    void setXY(int gx, int gy) { // subPixel
         curX = gx;
         curY = gy;
+    }
+
+    void setxyByPixel(int gx, int gy) { // pixel
+        setXY(gx * PIXEL_WIDTH, gy * PIXEL_HEIGHT);
     }
 
     void rect(int x, int y, int w, int h) { // 좌상단 꼭짓점 좌표 (x, y)부터 가로 w, 세로 h개의 픽셀 표시
@@ -112,6 +116,10 @@ public:
 
     void centerAlignedText(string st) {
         curX -= st.size() / 2;
+        for (auto ch : st) lazyPrint(ch);
+    }
+    
+    void leftAlignedText(string st) {
         for (auto ch : st) lazyPrint(ch);
     }
 

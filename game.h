@@ -32,6 +32,9 @@ private:
     static constexpr int HOLD_BORDER_HEIGHT = 4;
     static constexpr int MARGIN_HEIGHT = 3; // 보드판 상단에 들어갈 여백 길이(단위 : 격자개수)
     static constexpr int MARGIN_WIDTH = HOLD_BORDER_WIDTH + 2; // 보드판 좌측에 들어갈 여백 길이(단위 : 격자개수)
+    static constexpr int GAMEINFO_MARGIN = 2;
+
+    static_assert(ROWS >= -~HOLD_BORDER_HEIGHT + -~GAMEINFO_MARGIN * 2);
 
     vector<pair<int, int> > borderPos;
 
@@ -255,21 +258,14 @@ private:
     }
 
     void drawHold() {
-        // hold Border 가로경계
-        lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT, ConsoleColor::BORDER_DEFAULT);
-        for (int x = 2; x < MARGIN_WIDTH; x++) {
-            drawGrid(-x, 0);
-            drawGrid(-x, HOLD_BORDER_HEIGHT);
-        }
+        // hold Border
+        lazyPrinter.setColor(ConsoleColor::ORIGINAL_FONT);
 
-        // hold Border 세로경계
-        // lazyPrinter.rectBySubPixel(LEN * PIXEL_WIDTH, MARGIN_HEIGHT * LEN * PIXEL_HEIGHT, LEN * PIXEL_WIDTH / 2, LEN * HOLD_BORDER_HEIGHT);
-        // lazyPrinter.rectBySubPixel((HOLD_BORDER_WIDTH + 1) * LEN * PIXEL_WIDTH - PIXEL_WIDTH / 2, MARGIN_HEIGHT * LEN * PIXEL_HEIGHT, LEN * PIXEL_WIDTH / 2, LEN * HOLD_BORDER_HEIGHT);
+        lazyPrinter.setxyByPixel(MARGIN_WIDTH / 2 * LEN, MARGIN_HEIGHT * LEN);
+        lazyPrinter.centerAlignedText("--- HOLD ---");
 
-        // hold Border title
-        lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT);
-        lazyPrinter.setXY(MARGIN_WIDTH / 2 * LEN * PIXEL_WIDTH, MARGIN_HEIGHT * LEN * PIXEL_HEIGHT);
-        lazyPrinter.centerAlignedText(" HOLD ");
+        lazyPrinter.setxyByPixel(MARGIN_WIDTH / 2 * LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT) * LEN);
+        lazyPrinter.centerAlignedText("------------");
 
         // holded Block
         int hx = -MARGIN_WIDTH / 2 - holdedBlock.getCenterX();
@@ -302,6 +298,35 @@ private:
         }
     }
 
+    void drawGameInfo() {
+        lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT);
+        lazyPrinter.setColor(ConsoleColor::ORIGINAL_FONT);
+
+        // broken lines
+        lazyPrinter.setxyByPixel(LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT + GAMEINFO_MARGIN) * LEN);
+        lazyPrinter.leftAlignedText("lines:");
+
+        lazyPrinter.setxyByPixel(LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT + GAMEINFO_MARGIN + 1) * LEN);
+        lazyPrinter.leftAlignedText(to_string(brokenLines));
+
+        // play time
+        lazyPrinter.setxyByPixel(LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT + 2 * GAMEINFO_MARGIN + 1) * LEN);
+        lazyPrinter.leftAlignedText("time");
+
+        lazyPrinter.setxyByPixel(LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT + 2 * GAMEINFO_MARGIN + 2) * LEN);
+        lazyPrinter.leftAlignedText(to_string(playTime / 1000) + "." + to_string(playTime % 1000 / 10));
+
+        // gameover, paused 여부
+        if (gameover) {
+            lazyPrinter.setxyByPixel((-~MARGIN_WIDTH + COLS / 2) * LEN, (-~MARGIN_HEIGHT + ROWS / 2) * LEN);
+            lazyPrinter.centerAlignedText("GAME OVER");
+        }
+        else if (paused) {
+            lazyPrinter.setxyByPixel((-~MARGIN_WIDTH + COLS / 2) * LEN, (-~MARGIN_HEIGHT + ROWS / 2) * LEN);
+            lazyPrinter.centerAlignedText("PAUSED");
+        }
+    }
+
     void display() {
         lazyPrinter.init();
 
@@ -320,6 +345,7 @@ private:
         drawFallingBlock();
         drawHold();
         drawHardDropShockWave();
+        drawGameInfo();
 
         lazyPrinter.render();
     }
@@ -370,9 +396,7 @@ public:
     }
 
     void run() {
-        if (paused) return;
-
-        if (!gameover) update();
+        if (!paused && !gameover) update();
         display();
     }
 
@@ -381,9 +405,7 @@ public:
     }
 
     void replay() {
-        if (!gameover) return;
-
-        start();
+        if (gameover) start();
     }
 
     void applyMove(Move move) {

@@ -1,5 +1,5 @@
 ### 게임 로직 관련
-- [ ] 유저 조작
+- [X] 유저 조작
     - [X] pause
     - [X] hold
     - [X] move left/right/down
@@ -21,10 +21,11 @@
     - [X] ghostBlock 보여주기
     - [X] holdedBlocks canHold 여부 보여주기
 
-- [ ] 기타
-    - [ ] 플레이시간 보여주기
-    - [ ] 줄 부순 개수 보여주기
-    - [ ] pause, gameover 문구 표시
+- [ ] 게임 정보 표시
+    - [X] 플레이시간 보여주기
+    - [X] 줄 부순 개수 보여주기
+    - [X] pause, gameover 문구 표시
+    - [ ] drop 타이머 보여주기
 
 ### 애니메이션
 - [ ] break Full Row 관련
@@ -42,5 +43,7 @@
 - [X] 출력 최적화, 화면 깜빡임 제거
 
 
-### assert
-    const char KEY 사용자 지정 부분 키 겹친 거 없나 static_assert로 확인할지?
+### 코드 관련
+- [ ] draw함수 const 추가. lazyPrinter는 mutable로 선언
+~~- [ ] const char KEY 사용자 지정 키 중복방지 static_assert~~
+- [X] tui관련 상수들이랑 ROWS 대소관계 static_assert
