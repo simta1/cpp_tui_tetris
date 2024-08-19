@@ -32,8 +32,8 @@ private:
     // TUI 길이 (단위 : 격자개수)
     static constexpr int HOLD_BORDER_WIDTH = 8;
     static constexpr int HOLD_BORDER_HEIGHT = 4;
-    static constexpr int MARGIN_HEIGHT = 3; // 보드판 상단에 들어갈 여백 길이(단위 : 격자개수)
-    static constexpr int MARGIN_WIDTH = HOLD_BORDER_WIDTH + 2; // 보드판 좌측에 들어갈 여백 길이(단위 : 격자개수)
+    static constexpr int MARGIN_HEIGHT = 3; // 보드판 상단 여백 길이
+    static constexpr int MARGIN_WIDTH = HOLD_BORDER_WIDTH + 2; // 보드판 좌측 여백 길이
     static constexpr int GAMEINFO_MARGIN = 2;
 
     static constexpr int MIN_ROWS = max(HOLD_BORDER_HEIGHT + GAMEINFO_MARGIN * 2 + 2 + GAMEINFO_MARGIN + USER_CONTROL_KEY_COUNT, HOLD_BORDER_HEIGHT * NEXTBLOCK_COUNT) - 2;
@@ -41,6 +41,10 @@ private:
     static_assert(ROWS >= MIN_ROWS, "행 개수 부족");
     static_assert(COLS >= TETROMINO_MAX_WIDTH, "열 개수 부족");
     static_assert(HOLD_BORDER_WIDTH >= TETROMINO_MAX_WIDTH, "공백 길이 부족");
+
+    // 단위 : pixel 개수
+    static constexpr int HARDDROP_VIBRATION_LEN = 1;
+    static constexpr int BREAKROW_VIBRATION_LEN = 1;
 
     // HARDDROP 충격파 효과 관련
     const double HARDDROP_WAVE_VELOCITY = 1.5;
@@ -412,9 +416,10 @@ private:
 
         // breakRow 진동효과 (가로)
         if (haveFullRow()) {
-            int sign = 1 - 2 * (timer_breakRow.getTime() / (breakRowVibrationPeriod / sleepTime) % 2);
-            lazyPrinter.translate(sign * BREAKROW_VIBRATION_LEN, 0);
+            int dir = 2 * (timer_breakRow.getTime() / (breakRowVibrationPeriod / sleepTime) % 2);
+            lazyPrinter.translate(dir * BREAKROW_VIBRATION_LEN, 0);
         }
+        else lazyPrinter.translate(BREAKROW_VIBRATION_LEN, 0);
 
         drawMargin();
         drawBorder();
@@ -431,7 +436,7 @@ private:
 
 public:
     Game() : \
-        board(ROWS, vector<int>(COLS)), lazyPrinter((MARGIN_WIDTH + 1 + COLS + 1 + MARGIN_WIDTH) * LEN, (MARGIN_HEIGHT + 1 + ROWS + 1) * LEN), \
+        board(ROWS, vector<int>(COLS)), lazyPrinter((MARGIN_WIDTH + 1 + COLS + 1 + MARGIN_WIDTH) * LEN * PIXEL_WIDTH + 2 * BREAKROW_VIBRATION_LEN, (MARGIN_HEIGHT + 1 + ROWS + 1) * LEN * PIXEL_HEIGHT + HARDDROP_VIBRATION_LEN), \
         timer_drop(dropTime / sleepTime, true), \
         timer_hardDropped(hardDropAnimationTime / sleepTime, false), \
         timer_breakRow(breakRowAnimationTime / sleepTime, true) {

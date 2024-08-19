@@ -13,9 +13,6 @@ const char PIXEL_CHAR_BORDER_VERTICAL = '|';
 const int PIXEL_WIDTH = 2;
 const int PIXEL_HEIGHT = 1;
 
-const int HARDDROP_VIBRATION_LEN = 1;
-const int BREAKROW_VIBRATION_LEN = 1;
-
 class LazyPrinter {
 private:
     const int WIDTH;
@@ -59,7 +56,7 @@ private:
 
 public:
     LazyPrinter(int width, int height) : \
-        WIDTH(width * PIXEL_WIDTH + 2 * BREAKROW_VIBRATION_LEN), HEIGHT(height * PIXEL_HEIGHT + HARDDROP_VIBRATION_LEN), \
+        WIDTH(width), HEIGHT(height), \
         prevConsole(WIDTH, vector<Data>(HEIGHT)), console(WIDTH, vector<Data>(HEIGHT)) {
             init();
         }
@@ -69,7 +66,7 @@ public:
     }
 
     void init() {
-        translateX = BREAKROW_VIBRATION_LEN;
+        translateX = 0;
         translateY = 0;
         curX = curY = 0;
         curColor = convertColorToInt(ConsoleColor::WHITE);
