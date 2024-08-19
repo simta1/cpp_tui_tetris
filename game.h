@@ -16,8 +16,8 @@ using namespace std;
 // ms 기준
 const int sleepTime = 10;
 const int dropTime = 500;
-const int hardDropAnimationTime = 100;
-const int breakRowAnimationTime = 70;
+const int hardDropAnimationTime = 50;
+const int breakRowAnimationTime = 30;
 const int breakRowVibrationPeriod = breakRowAnimationTime / 2;
 
 template <int ROWS, int COLS>
