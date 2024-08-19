@@ -299,7 +299,6 @@ private:
     }
 
     void drawGameInfo() {
-        lazyPrinter.setColor(ConsoleColor::BORDER_DEFAULT);
         lazyPrinter.setColor(ConsoleColor::ORIGINAL_FONT);
 
         // broken lines
@@ -318,6 +317,7 @@ private:
 
         // gameover, paused 여부
         if (gameover) {
+            lazyPrinter.setColor(ConsoleColor::BLACK, ConsoleColor::WHITE);
             lazyPrinter.setxyByPixel((-~MARGIN_WIDTH + COLS / 2) * LEN, (-~MARGIN_HEIGHT + ROWS / 2) * LEN);
             lazyPrinter.centerAlignedText("GAME OVER");
         }
