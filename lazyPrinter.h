@@ -7,7 +7,7 @@
 #include "consoleColor.h"
 using namespace std;
 
-const char PIXEL_CHAR = 'X';
+const char PIXEL_CHAR = 'O';
 const int PIXEL_WIDTH = 2;
 const int PIXEL_HEIGHT = 1;
 

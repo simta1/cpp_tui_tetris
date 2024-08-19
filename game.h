@@ -22,6 +22,9 @@ const int breakRowVibrationPeriod = breakRowAnimationTime / 2;
 template <int ROWS, int COLS>
 class Game {
 private:
+    // nextBlocks 개수
+    static constexpr int NEXTBLOCK_COUNT = 5;
+
     // 격자칸 한 변에 사용할 픽셀 개수
     static constexpr int LEN = 1;
 
@@ -32,9 +35,10 @@ private:
     static constexpr int MARGIN_WIDTH = HOLD_BORDER_WIDTH + 2; // 보드판 좌측에 들어갈 여백 길이(단위 : 격자개수)
     static constexpr int GAMEINFO_MARGIN = 2;
 
-    static_assert(ROWS >= -~HOLD_BORDER_HEIGHT + -~GAMEINFO_MARGIN * 2);
+    static constexpr int MIN_ROWS = max(-~HOLD_BORDER_HEIGHT + -~GAMEINFO_MARGIN * 2, HOLD_BORDER_HEIGHT * NEXTBLOCK_COUNT);
+    // static_assert(ROWS >= MIN_ROWS, "게임보드는 최소 " + to_string(MIN_ROWS) + "개의 행을 가져야 합니다.");
 
-    //
+    // HARDDROP 충격파 효과 관련
     const double HARDDROP_WAVE_VELOCITY = 1;
     const int HARDDROP_WAVE_INSENSITIVITY = 6;
 
@@ -47,8 +51,7 @@ private:
     vector<int> fullRows;
     
     Bag<7> bag;
-    const int NEXTBLOCK_COUNT = 3;
-    queue<Tetromino> nextBlocks;
+    deque<Tetromino> nextBlocks; // queue로만 쓸 거긴 한데 인덱싱 필요해서 덱으로 사용
     FallingBlock fallingBlock;
     HoldedBlock holdedBlock;
 
@@ -194,8 +197,8 @@ private:
         if (!kind) {
             assert (!nextBlocks.empty());
             kind = nextBlocks.front().getKind();
-            nextBlocks.pop();
-            nextBlocks.push(Tetromino(bag.takeOut()));
+            nextBlocks.pop_front();
+            nextBlocks.push_back(Tetromino(bag.takeOut()));
         }
 
         fallingBlock = FallingBlock(kind, COLS / 2);
@@ -227,8 +230,15 @@ private:
 
     void drawMargin() {
         lazyPrinter.setColor(ConsoleColor::ORIGINALBG);
+        
+        // board 상단
         lazyPrinter.rect(MARGIN_WIDTH * LEN, 0, (COLS + 2) * LEN, MARGIN_HEIGHT * LEN);
+
+        // board 좌측
         lazyPrinter.rect(0, MARGIN_HEIGHT * LEN, MARGIN_WIDTH * LEN, (ROWS + 2) * LEN);
+
+        // board 우측
+        lazyPrinter.rect((MARGIN_WIDTH + COLS + 2) * LEN, MARGIN_HEIGHT * LEN, MARGIN_WIDTH * LEN, (ROWS + 2) * LEN);
     }
 
     void drawBorder() {
@@ -267,13 +277,13 @@ private:
         for (auto [x, y] : fallingBlock.getCoordinates()) drawGrid(x + 1, y + 1);
     }
 
-    void drawHold() {
-        // hold Border
+    void drawHoldedBlock() {
+        // holdedBlock title
         lazyPrinter.setColor(ConsoleColor::ORIGINAL_FONT);
-
         lazyPrinter.setxyByPixel(MARGIN_WIDTH / 2 * LEN, MARGIN_HEIGHT * LEN);
         lazyPrinter.centerAlignedText("--- HOLD ---");
 
+        // holdedBlock border
         lazyPrinter.setxyByPixel(MARGIN_WIDTH / 2 * LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT) * LEN);
         lazyPrinter.centerAlignedText("------------");
 
@@ -285,6 +295,27 @@ private:
         else lazyPrinter.setColor(tetrominoColor[holdedBlock.getKind()]);
 
         for (auto [x, y] : holdedBlock.getShape()) drawGrid(x + hx, y + hy);
+    }
+
+    void drawNextBlocks() {
+        // nextBlocks title
+        lazyPrinter.setColor(ConsoleColor::ORIGINAL_FONT);
+        lazyPrinter.setxyByPixel(MARGIN_WIDTH + COLS + 2 + MARGIN_WIDTH / 2 * LEN, MARGIN_HEIGHT * LEN);
+        lazyPrinter.centerAlignedText("--- NEXT ---");
+
+        // nextBlocks border
+        for (int i = 0; i < NEXTBLOCK_COUNT; i++) {
+            lazyPrinter.setxyByPixel(MARGIN_WIDTH + COLS + 2 + MARGIN_WIDTH / 2 * LEN, (MARGIN_HEIGHT + -~i * HOLD_BORDER_HEIGHT) * LEN);
+            lazyPrinter.centerAlignedText("------------");
+        }
+
+        // nextBlocks
+        for (int i = 0; i < NEXTBLOCK_COUNT; i++) {
+            int nx = 1 + COLS + 1 + MARGIN_WIDTH / 2 - nextBlocks[i].getCenterX();
+            int ny = -~i * HOLD_BORDER_HEIGHT - 1 - nextBlocks[i].getMaxY();
+            lazyPrinter.setColor(tetrominoColor[nextBlocks[i].getKind()], tetrominoColor[nextBlocks[i].getKind()]);
+            for (auto [x, y] : nextBlocks[i].getShape()) drawGrid(x + nx, y + ny);
+        }
     }
 
     int getTaxiDist(int x1, int y1, int x2, int y2) {
@@ -353,7 +384,8 @@ private:
         drawBorder();
         drawBoard();
         drawFallingBlock();
-        drawHold();
+        drawHoldedBlock();
+        drawNextBlocks();
         drawHardDropShockWave();
         drawGameInfo();
 
@@ -362,7 +394,7 @@ private:
 
 public:
     Game() : \
-        board(ROWS, vector<int>(COLS)), lazyPrinter((MARGIN_WIDTH + COLS + 2) * LEN, (MARGIN_HEIGHT + ROWS + 2) * LEN), \
+        board(ROWS, vector<int>(COLS)), lazyPrinter((MARGIN_WIDTH + 1 + COLS + 1 + MARGIN_WIDTH) * LEN, (MARGIN_HEIGHT + 1 + ROWS + 1) * LEN), \
         timer_drop(dropTime / sleepTime, true), \
         timer_hardDropped(hardDropAnimationTime / sleepTime, false), \
         timer_breakRow(breakRowAnimationTime / sleepTime, true) {
@@ -390,8 +422,8 @@ public:
 
         // tetromino 관련
         bag.clear();
-        while (!nextBlocks.empty()) nextBlocks.pop();
-        for (int i = 0; i < NEXTBLOCK_COUNT; i++) nextBlocks.push(Tetromino(bag.takeOut()));
+        nextBlocks.clear();
+        for (int i = 0; i < NEXTBLOCK_COUNT; i++) nextBlocks.push_back(Tetromino(bag.takeOut()));
         makeNewFallingBlock();
         holdedBlock = HoldedBlock();
 
