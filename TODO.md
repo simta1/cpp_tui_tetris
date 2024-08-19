@@ -19,14 +19,14 @@
     - [X] 7-bag
     - [X] nextBlocks
     - [X] ghostBlock
+    - [X] drop 속도 조금씩 증가
 
-- [ ] 게임 정보 표시
+- [X] 게임 정보 표시
     - [X] holdedBlocks canHold 여부 보여주기
     - [X] 플레이시간 보여주기
     - [X] 줄 부순 개수 보여주기
     - [X] pause, gameover 문구 표시
     - [X] 조작법 보여주기
-    - [ ] drop 타이머 보여주기
 
 ### 애니메이션
 - [X] break Full Row 관련
@@ -39,7 +39,6 @@
     - [ ] border 무지개
 
 - [X] harddrop 시각효과
-    ~~- [X] 진동 -> 코드 짜긴 했는데 주석으로 둠~~
     - [X] 색깔 변화 효과
 
 - [X] 출력 최적화, 화면 깜빡임 제거

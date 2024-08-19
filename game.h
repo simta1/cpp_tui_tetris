@@ -14,11 +14,17 @@
 using namespace std;
 
 // ms 기준
-const int sleepTime = 10;
-const int dropTime = 500;
-const int hardDropAnimationTime = 50;
-const int breakRowAnimationTime = 30;
-const int breakRowVibrationPeriod = breakRowAnimationTime / 2;
+constexpr int sleepTime = 10;
+constexpr int dropTime = 500;
+constexpr int dropTimeLowerLimit = 45;
+constexpr int dropSpeedUpPeriod = 5000;
+constexpr int hardDropAnimationTime = 50;
+constexpr int breakRowAnimationTime = 30;
+constexpr int breakRowVibrationPeriod = breakRowAnimationTime / 2;
+
+static_assert(breakRowVibrationPeriod >= sleepTime, "break Row 애니메이션 길이 부족");
+
+const double dropSpeedUpRate = 0.9;
 
 template <int ROWS, int COLS>
 class Game {
@@ -229,6 +235,10 @@ private:
         timer_drop.init();
     }
 
+    void updateFallingBlockDropSpeed() {
+        if (dropSpeedUpPeriod < sleepTime || (playTime / sleepTime) % (dropSpeedUpPeriod / sleepTime) == 0) timer_drop.speedUp(dropSpeedUpRate, dropTimeLowerLimit / sleepTime);
+    }
+
     void update() {
         hardDropped = !timer_hardDropped.isOver();
 
@@ -246,6 +256,7 @@ private:
         }
 
         playTime += sleepTime;
+        updateFallingBlockDropSpeed();
     }
 
     void drawGrid(int x, int y) {
@@ -383,7 +394,7 @@ private:
         lazyPrinter.leftAlignedText("time");
 
         lazyPrinter.setxyByPixel(LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT + 2 * GAMEINFO_MARGIN + 2) * LEN);
-        lazyPrinter.leftAlignedText(to_string(playTime / 1000) + "." + to_string(playTime % 1000 / 10));
+        lazyPrinter.leftAlignedText(to_string(playTime / 1000) + "." + to_string(playTime % 1000 * 0.001).substr(2, 2));
 
         // gameover, paused 여부
         if (gameover) {
@@ -410,9 +421,6 @@ private:
 
     void display() {
         lazyPrinter.init();
-
-        // harddrop 진동효과 (세로)
-        // if (!timer_hardDropped.isOver()) lazyPrinter.translate(0, HARDDROP_VIBRATION_LEN);
 
         // breakRow 진동효과 (가로)
         if (haveFullRow()) {

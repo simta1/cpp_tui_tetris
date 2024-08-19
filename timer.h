@@ -34,6 +34,10 @@ public:
     int getTime() {
         return elapsedTime;
     }
+
+    void speedUp(double rate, int lowerLimit=1) {
+        endTime = max(lowerLimit, int(endTime * rate));
+    }
 };
 
 #endif
