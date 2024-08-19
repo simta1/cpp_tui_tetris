@@ -30,16 +30,17 @@ private:
     static constexpr int LEN = 1;
 
     // TUI 길이 (단위 : 격자개수)
-    static constexpr int HOLD_BORDER_WIDTH = 6;
+    static constexpr int HOLD_BORDER_WIDTH = 8;
     static constexpr int HOLD_BORDER_HEIGHT = 4;
     static constexpr int MARGIN_HEIGHT = 3; // 보드판 상단에 들어갈 여백 길이(단위 : 격자개수)
     static constexpr int MARGIN_WIDTH = HOLD_BORDER_WIDTH + 2; // 보드판 좌측에 들어갈 여백 길이(단위 : 격자개수)
     static constexpr int GAMEINFO_MARGIN = 2;
 
-    static constexpr int MIN_ROWS = max(-~HOLD_BORDER_HEIGHT + -~GAMEINFO_MARGIN * 2, HOLD_BORDER_HEIGHT * NEXTBLOCK_COUNT);
-    static constexpr int MIN_COLS = 4; // 테트로미노 최대 길이
+    static constexpr int MIN_ROWS = max(HOLD_BORDER_HEIGHT + GAMEINFO_MARGIN * 2 + 2 + GAMEINFO_MARGIN + USER_CONTROL_KEY_COUNT, HOLD_BORDER_HEIGHT * NEXTBLOCK_COUNT) - 2;
+    static constexpr int TETROMINO_MAX_WIDTH = 4; // 테트로미노 최대 길이
     static_assert(ROWS >= MIN_ROWS, "행 개수 부족");
-    static_assert(ROWS >= MIN_COLS, "열 개수 부족");
+    static_assert(COLS >= TETROMINO_MAX_WIDTH, "열 개수 부족");
+    static_assert(HOLD_BORDER_WIDTH >= TETROMINO_MAX_WIDTH, "공백 길이 부족");
 
     // HARDDROP 충격파 효과 관련
     const double HARDDROP_WAVE_VELOCITY = 1;
@@ -296,15 +297,20 @@ private:
         for (auto [x, y] : fallingBlock.getCoordinates()) drawGrid(x + 1, y + 1);
     }
 
+    string getBorderString(string st="") {
+        int len = HOLD_BORDER_WIDTH * PIXEL_WIDTH - st.size() >> 1;
+        return string(len, '-') + st + string(len, '-');
+    }
+
     void drawHoldedBlock() {
         // holdedBlock title
         lazyPrinter.setColor(ConsoleColor::ORIGINAL_FONT);
         lazyPrinter.setxyByPixel(MARGIN_WIDTH / 2 * LEN, MARGIN_HEIGHT * LEN);
-        lazyPrinter.centerAlignedText("--- HOLD ---");
+        lazyPrinter.centerAlignedText(getBorderString(" HOLD "));
 
         // holdedBlock border
         lazyPrinter.setxyByPixel(MARGIN_WIDTH / 2 * LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT) * LEN);
-        lazyPrinter.centerAlignedText("------------");
+        lazyPrinter.centerAlignedText(getBorderString());
 
         // holded Block
         int hx = -MARGIN_WIDTH / 2 - holdedBlock.getCenterX();
@@ -320,12 +326,12 @@ private:
         // nextBlocks title
         lazyPrinter.setColor(ConsoleColor::ORIGINAL_FONT);
         lazyPrinter.setxyByPixel(MARGIN_WIDTH + COLS + 2 + MARGIN_WIDTH / 2 * LEN, MARGIN_HEIGHT * LEN);
-        lazyPrinter.centerAlignedText("--- NEXT ---");
+        lazyPrinter.centerAlignedText(getBorderString(" NEXT "));
 
         // nextBlocks border
         for (int i = 0; i < NEXTBLOCK_COUNT; i++) {
             lazyPrinter.setxyByPixel(MARGIN_WIDTH + COLS + 2 + MARGIN_WIDTH / 2 * LEN, (MARGIN_HEIGHT + -~i * HOLD_BORDER_HEIGHT) * LEN);
-            lazyPrinter.centerAlignedText("------------");
+            lazyPrinter.centerAlignedText(getBorderString());
         }
 
         // nextBlocks
@@ -391,6 +397,13 @@ private:
         }
     }
 
+    void drawManual() {
+        for (int i = 0; i < USER_CONTROL_KEYS.size(); i++) {
+            lazyPrinter.setxyByPixel(LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT + 2 * GAMEINFO_MARGIN + 2 + GAMEINFO_MARGIN + i) * LEN);
+            lazyPrinter.leftAlignedText(USER_CONTROL_KEYS[i]);
+        }
+    }
+
     void display() {
         lazyPrinter.init();
 
@@ -411,6 +424,7 @@ private:
         drawNextBlocks();
         drawHardDropShockWave();
         drawGameInfo();
+        drawManual();
 
         lazyPrinter.render();
     }
