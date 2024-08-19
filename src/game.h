@@ -65,40 +65,40 @@ private:
         static constexpr double dropSpeedUpRate = 0.9;
 
     // board 관련
-        vector<vector<int> > board;
-        vector<int> fullRows;
-        vector<pair<int, int> > borderPos;
+    vector<vector<int> > board;
+    vector<int> fullRows;
+    vector<pair<int, int> > borderPos;
 
     // tetromino 관련
-        Bag<7> bag;
-        deque<Tetromino> nextBlocks; // queue로만 쓸 거긴 한데 인덱싱 필요해서 덱으로 사용
-        FallingBlock fallingBlock;
-        HoldedBlock holdedBlock;
+    Bag<7> bag;
+    deque<Tetromino> nextBlocks; // queue로만 쓸 거긴 한데 인덱싱 필요해서 덱으로 사용
+    FallingBlock fallingBlock;
+    HoldedBlock holdedBlock;
 
     // timer
-        Timer timer_drop;
-        Timer timer_hardDropped;
-        Timer timer_breakRow;
-        Timer timer_rainbowBorder;
+    Timer timer_drop;
+    Timer timer_hardDropped;
+    Timer timer_breakRow;
+    Timer timer_rainbowBorder;
 
     // 게임 정보
-        int brokenLines;
-        int playTime;
+    int brokenLines;
+    int playTime;
 
-        bool paused;
-        bool gameover;
+    bool paused;
+    bool gameover;
 
     // printer // 콘솔창 출력 담당
-        mutable LazyPrinter lazyPrinter;
+    mutable LazyPrinter lazyPrinter;
 
     // harddrop 애니메이션 관련
-        bool hardDropped;
-        int prevHardDropHeight;
-        int prevHardDropPosX;
-        int prevHardDropPosY;
+    bool hardDropped;
+    int prevHardDropHeight;
+    int prevHardDropPosX;
+    int prevHardDropPosY;
 
     // 무지개 애니메이션 관련
-        bool rainbowAnimationOn;
+    bool rainbowAnimationOn;
 
     void hardDrop() {
         if (haveFullRow()) breakFullRowsInstantly();
