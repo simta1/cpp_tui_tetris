@@ -8,6 +8,7 @@
 
 // -------------------------------------------------------- 사용자 지정 ------------------------------------------------------------
 const char KEY_PAUSE_GAME = 'p';
+const char KEY_REPLAY_GAME = 'r';
 const char KEY_MOVE_LEFT = 'a';
 const char KEY_MOVE_RIGHT = 'd';
 const char KEY_ROTATE_LEFT = KEYBOARD_ARROW_LEFT;
@@ -39,6 +40,7 @@ int main() {
             char key = _getch(); // input
 
             if (key == KEY_PAUSE_GAME) game.pause();
+            else if (key == KEY_REPLAY_GAME) game.replay();
             else if (key == KEY_MOVE_LEFT) game.applyMove(Move::LEFT);
             else if (key == KEY_MOVE_RIGHT) game.applyMove(Move::RIGHT);
             else if (key == KEY_ROTATE_LEFT) game.applyMove(Move::ROTATE_CCW);

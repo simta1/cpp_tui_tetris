@@ -35,6 +35,10 @@ public:
         inventory.pop_back();
         return tmp;
     }
+
+    void clear() {
+        inventory.clear();
+    }
 };
 
 #endif

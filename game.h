@@ -39,6 +39,7 @@ private:
 
     // 게임 로직 관련
     vector<vector<int> > board;
+    vector<int> fullRows;
     
     Bag<7> bag;
     FallingBlock fallingBlock;
@@ -53,11 +54,9 @@ private:
     int prevHardDropPosX;
     int prevHardDropPosY;
 
-    vector<int> fullRows;
-
     // 추가 정보
     int brokenLines;
-    double playTime;
+    int playTime;
 
     bool paused;
     bool gameover;
@@ -205,6 +204,8 @@ private:
                 else gameover = true;
             }
         }
+
+        playTime += sleepTime;
     }
 
     void drawGrid(int x, int y) {
@@ -345,33 +346,44 @@ public:
     }
 
     void start() {
-        // board
+        // board 관련
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) board[i][j] = 0;
         }
-
         fullRows.clear();
 
-        // init
+        // tetromino 관련
+        bag.clear();
+        makeNewFallingBlock();
+        holdedBlock = HoldedBlock();
+
+        // timer 관련
+        timer_drop.init();
+        timer_hardDropped.end();
+        timer_breakRow.end();
+
+        // 추가 게임 정보
         brokenLines = 0;
         playTime = 0;
-
         paused = false;
         gameover = false;
-        
-        // falling block
-        makeNewFallingBlock();
     }
 
     void run() {
         if (paused) return;
-        
+
         if (!gameover) update();
         display();
     }
 
     void pause() {
         paused ^= 1;
+    }
+
+    void replay() {
+        if (!gameover) return;
+
+        start();
     }
 
     void applyMove(Move move) {
