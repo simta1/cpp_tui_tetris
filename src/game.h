@@ -29,7 +29,7 @@ private:
         static constexpr int LEN = 1;
 
         // UI 크기 (단위 : 격자개수)
-        static constexpr int BOARD_BORDER_THICKNESS = 1;
+        static constexpr int BOARD_BORDER_THICKNESS = 3;
         static constexpr int HOLD_BORDER_WIDTH = 8;
         static constexpr int HOLD_BORDER_HEIGHT = 4;
         static constexpr int MARGIN_HEIGHT = 3; // 보드판 상단 여백 길이
@@ -65,7 +65,7 @@ private:
         // 테트로미노 떨어지는 시간간격 감소 비율
         static constexpr double dropSpeedUpRate = 0.9;
 
-        // lock delay 초기화 횟수 제한
+        // lock delay 초기화 제한 횟수
         static constexpr int lockDelayResetLimit = 8;
 
     // board 관련
@@ -411,9 +411,9 @@ private:
         int shockwavePos = min(int(timer_hardDropped.getTime() * HARDDROP_WAVE_VELOCITY), harddropWaveMaxDistance);
 
         lazyPrinter.setColor(ConsoleColor::WHITE, ConsoleColor::WHITE);
-        for (int i = 0; i <= ROWS + 1; i++) {
-            for (int j = 0; j <= COLS + 1; j++) {
-                if (getTaxiDist(prevHardDropPosX, prevHardDropPosY, j, i) == shockwavePos) drawGrid(j + BOARD_BORDER_THICKNESS, i + BOARD_BORDER_THICKNESS);
+        for (int x = 0; x < COLS + BOARD_BORDER_THICKNESS * 2; x++) {
+            for (int y = 0; y < ROWS + BOARD_BORDER_THICKNESS * 2; y++) {
+                if (getTaxiDist(prevHardDropPosX, prevHardDropPosY, x, y) == shockwavePos) drawGrid(x, y);
             }
         }
     }
@@ -524,6 +524,7 @@ public:
 
         // timer 관련
         timer_drop.init();
+        timer_drop.set(dropTime / sleepDuration);
         timer_hardDropped.end();
         timer_breakRow.end();
         timer_rainbowBorder.end();

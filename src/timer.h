@@ -38,6 +38,10 @@ public:
     void speedUp(double rate, int lowerLimit=1) {
         endTime = max(lowerLimit, int(endTime * rate));
     }
+
+    void set(int time) {
+        endTime = time;
+    }
 };
 
 #endif
