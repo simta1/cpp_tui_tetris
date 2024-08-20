@@ -64,6 +64,9 @@ private:
         // 테트로미노 떨어지는 시간간격 감소 비율
         static constexpr double dropSpeedUpRate = 0.9;
 
+        // lock delay 초기화 횟수 제한
+        static constexpr int lockDelayResetLimit = 8;
+
     // board 관련
     vector<vector<int> > board;
     vector<int> fullRows;
@@ -74,6 +77,8 @@ private:
     deque<Tetromino> nextBlocks; // queue로만 쓸 거긴 한데 인덱싱 필요해서 덱으로 사용
     FallingBlock fallingBlock;
     HoldedBlock holdedBlock;
+
+    int lockDelayResetCount;
 
     // timer
     Timer timer_drop;
@@ -249,6 +254,7 @@ private:
         }
 
         fallingBlock = FallingBlock(kind, COLS / 2);
+        lockDelayResetCount = 0;
         timer_drop.init();
     }
 
@@ -577,7 +583,9 @@ public:
 
         if (canApply) {
             fallingBlock.applyMove(move);
-            if (!checkFallingBlockCanDrop()) timer_drop.init();
+            
+            // lock delay 초기화 보정
+            if (!checkFallingBlockCanDrop() && lockDelayResetCount++ <= lockDelayResetLimit) timer_drop.init();
         }
     }
     

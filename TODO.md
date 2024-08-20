@@ -20,6 +20,7 @@
     - [X] nextBlocks
     - [X] ghostBlock
     - [X] drop 속도 조금씩 증가
+    - [X] lock delay reset 제한 추가
 
 - [X] 게임 정보 표시
     - [X] holdedBlocks canHold 여부 보여주기
