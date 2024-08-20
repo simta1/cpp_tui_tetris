@@ -101,8 +101,10 @@ private:
     bool rainbowAnimationOn;
 
     void hardDrop() {
+        // 줄 부수는 애니메이션 끝나기 전에 hard drop된 경우 즉시 애니메이션 종료 후 줄 부순 뒤 hard drop 적용
         if (haveFullRow()) breakFullRowsInstantly();
 
+        // 테트로미노 이동
         prevHardDropHeight = 0;
         while (checkFallingBlockCanDrop()) {
             fallingBlock.drop();
@@ -111,7 +113,7 @@ private:
         prevHardDropPosX = fallingBlock.getX() + fallingBlock.getCenterX();
         prevHardDropPosY = fallingBlock.getY() + fallingBlock.getMaxY();
 
-        // hard drop 후에는 바로 put되도록 타이머 조정
+        // hard drop 후에는 바로 put되도록 타이머 보정
         timer_drop.end();
         timer_hardDropped.init();
     }
@@ -228,7 +230,7 @@ private:
         }
     }
 
-    int putFallingBlock() { // 꽉 찬 줄 개수 리턴
+    int putFallingBlock() { // 테트로미노 보드에 고정 후 꽉 찬 줄 개수 리턴
         int kind = fallingBlock.getKind();
         for (auto [x, y] : fallingBlock.getCoordinates()) board[y][x] = kind;
         fallingBlock.put();
@@ -358,13 +360,13 @@ private:
         lazyPrinter.centerAlignedText(getBorderString());
 
         // holded Block
-        int hx = -MARGIN_WIDTH / 2 - holdedBlock.getCenterX();
-        int hy = HOLD_BORDER_HEIGHT - 1 - holdedBlock.getMaxY();
+        int blockX = -MARGIN_WIDTH / 2 - holdedBlock.getCenterX();
+        int blockY = HOLD_BORDER_HEIGHT - 1 - holdedBlock.getMaxY();
 
         if (holdedBlock.canHold()) lazyPrinter.setColor(tetrominoColor[holdedBlock.getKind()], tetrominoColor[holdedBlock.getKind()]);
         else lazyPrinter.setColor(tetrominoColor[holdedBlock.getKind()]);
 
-        for (auto [x, y] : holdedBlock.getShape()) drawGrid(x + hx, y + hy);
+        for (auto [x, y] : holdedBlock.getShape()) drawGrid(x + blockX, y + blockY);
     }
 
     void drawNextBlocks() const {
@@ -381,10 +383,10 @@ private:
 
         // nextBlocks
         for (int i = 0; i < NEXTBLOCK_COUNT; i++) {
-            int nx = 1 + COLS + 1 + MARGIN_WIDTH / 2 - nextBlocks[i].getCenterX();
-            int ny = -~i * HOLD_BORDER_HEIGHT - 1 - nextBlocks[i].getMaxY();
+            int blockX = 1 + COLS + 1 + MARGIN_WIDTH / 2 - nextBlocks[i].getCenterX();
+            int blockY = -~i * HOLD_BORDER_HEIGHT - 1 - nextBlocks[i].getMaxY();
             lazyPrinter.setColor(tetrominoColor[nextBlocks[i].getKind()], tetrominoColor[nextBlocks[i].getKind()]);
-            for (auto [x, y] : nextBlocks[i].getShape()) drawGrid(x + nx, y + ny);
+            for (auto [x, y] : nextBlocks[i].getShape()) drawGrid(x + blockX, y + blockY);
         }
     }
 
