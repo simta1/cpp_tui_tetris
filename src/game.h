@@ -22,14 +22,13 @@ private:
     // 출력 관련 상수
 
         // 진동효과 세기 (단위 : pixel 개수)
-        static constexpr int HARDDROP_VIBRATION_LEN = 1;
         static constexpr int BREAKROW_VIBRATION_LEN = 1;
 
         // 격자칸 한 변에 사용할 픽셀 개수
         static constexpr int LEN = 1;
 
         // UI 크기 (단위 : 격자개수)
-        static constexpr int BOARD_BORDER_THICKNESS = 3;
+        static constexpr int BOARD_BORDER_THICKNESS = 1;
         static constexpr int HOLD_BORDER_WIDTH = 8;
         static constexpr int HOLD_BORDER_HEIGHT = 4;
         static constexpr int MARGIN_HEIGHT = 3; // 보드판 상단 여백 길이
