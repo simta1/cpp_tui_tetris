@@ -57,8 +57,8 @@ private:
     }
 
 public:
-    LazyPrinter(int width, int height) : \
-        WIDTH(width), HEIGHT(height), \
+    LazyPrinter(int widthPixel, int widthSubPixel, int heightPixel, int heightSubPixel) : \
+        WIDTH(widthPixel * PIXEL_WIDTH + widthSubPixel), HEIGHT(heightPixel * PIXEL_HEIGHT + heightSubPixel), \
         prevConsole(WIDTH, vector<Data>(HEIGHT)), console(WIDTH, vector<Data>(HEIGHT)) {
 
         thema = 0;

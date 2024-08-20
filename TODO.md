@@ -48,7 +48,7 @@
 ### 코드 관련
 - [X] draw함수 const 추가. lazyPrinter는 mutable로 선언
 - [X] tui관련 상수들이랑 ROWS 대소관계 static_assert
-- [ ] 애니메이션 시간 관련 상수들 sleepTime보다 큰지 static_assert
-- [ ] border 두께 상수로 선언하기
+- [X] 애니메이션 시간 관련 상수들 sleepTime보다 큰지 static_assert
+- [X] border 두께 상수로 선언하기
 
 - [X] src폴더 만들고 코드관련 파일 전부 집어넣기

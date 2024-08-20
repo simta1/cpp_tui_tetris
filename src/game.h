@@ -29,13 +29,14 @@ private:
         static constexpr int LEN = 1;
 
         // UI 크기 (단위 : 격자개수)
+        static constexpr int BOARD_BORDER_THICKNESS = 1;
         static constexpr int HOLD_BORDER_WIDTH = 8;
         static constexpr int HOLD_BORDER_HEIGHT = 4;
         static constexpr int MARGIN_HEIGHT = 3; // 보드판 상단 여백 길이
         static constexpr int MARGIN_WIDTH = HOLD_BORDER_WIDTH + 2; // 보드판 좌측 여백 길이
         static constexpr int GAMEINFO_MARGIN = 2;
 
-        static constexpr int MIN_ROWS = max(HOLD_BORDER_HEIGHT + GAMEINFO_MARGIN * 2 + 2 + GAMEINFO_MARGIN + USER_CONTROL_KEY_COUNT, HOLD_BORDER_HEIGHT * NEXTBLOCK_COUNT) - 2;
+        static constexpr int MIN_ROWS = max(HOLD_BORDER_HEIGHT + -~GAMEINFO_MARGIN * 2 + GAMEINFO_MARGIN + USER_CONTROL_KEY_COUNT, HOLD_BORDER_HEIGHT * NEXTBLOCK_COUNT) - 2 * BOARD_BORDER_THICKNESS;
         static constexpr int TETROMINO_MAX_WIDTH = 4; // 테트로미노 최대 길이
         static_assert(ROWS >= MIN_ROWS, "행 개수 부족");
         static_assert(COLS >= TETROMINO_MAX_WIDTH, "열 개수 부족");
@@ -325,7 +326,7 @@ private:
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
                 lazyPrinter.setColor(tetrominoColor[board[i][j]], tetrominoColor[board[i][j]]);
-                drawGrid(j + 1, i + 1);
+                drawGrid(j + BOARD_BORDER_THICKNESS, i + BOARD_BORDER_THICKNESS);
             }
         }
 
@@ -334,7 +335,7 @@ private:
             for (int j = 0; j < COLS; j++) {
                 if (timer_breakRow.getTime() / (breakRowFlashDuration / sleepDuration) & 1) lazyPrinter.setColor(ConsoleColor::WHITE, ConsoleColor::ORIGINALBG);
                 else lazyPrinter.setColor(tetrominoColor[board[fullRow][j]], ConsoleColor::ORIGINALBG);
-                drawGrid(j + 1, fullRow + 1);
+                drawGrid(j + BOARD_BORDER_THICKNESS, fullRow + BOARD_BORDER_THICKNESS);
             }
         }
     }
@@ -343,11 +344,11 @@ private:
         // shadow
         int depth = howFarCanDrop();
         lazyPrinter.setColor(tetrominoColor[fallingBlock.getKind()]);
-        for (auto [x, y] : fallingBlock.getCoordinates()) drawGrid(x + 1, y + depth + 1);
+        for (auto [x, y] : fallingBlock.getCoordinates()) drawGrid(x + BOARD_BORDER_THICKNESS, y + depth + BOARD_BORDER_THICKNESS);
 
         // falling block
         lazyPrinter.setColor(tetrominoColor[fallingBlock.getKind()], tetrominoColor[fallingBlock.getKind()]);
-        for (auto [x, y] : fallingBlock.getCoordinates()) drawGrid(x + 1, y + 1);
+        for (auto [x, y] : fallingBlock.getCoordinates()) drawGrid(x + BOARD_BORDER_THICKNESS, y + BOARD_BORDER_THICKNESS);
     }
 
     string getBorderString(string st="") const {
@@ -378,18 +379,18 @@ private:
     void drawNextBlocks() const {
         // nextBlocks title
         lazyPrinter.setColor(ConsoleColor::ORIGINAL_FONT);
-        lazyPrinter.setxyByPixel(MARGIN_WIDTH + COLS + 2 + MARGIN_WIDTH / 2 * LEN, MARGIN_HEIGHT * LEN);
+        lazyPrinter.setxyByPixel(MARGIN_WIDTH + COLS + BOARD_BORDER_THICKNESS * 2 + MARGIN_WIDTH / 2 * LEN, MARGIN_HEIGHT * LEN);
         lazyPrinter.centerAlignedText(getBorderString(" NEXT "));
 
         // nextBlocks border
         for (int i = 0; i < NEXTBLOCK_COUNT; i++) {
-            lazyPrinter.setxyByPixel(MARGIN_WIDTH + COLS + 2 + MARGIN_WIDTH / 2 * LEN, (MARGIN_HEIGHT + -~i * HOLD_BORDER_HEIGHT) * LEN);
+            lazyPrinter.setxyByPixel(MARGIN_WIDTH + COLS + BOARD_BORDER_THICKNESS * 2 + MARGIN_WIDTH / 2 * LEN, (MARGIN_HEIGHT + -~i * HOLD_BORDER_HEIGHT) * LEN);
             lazyPrinter.centerAlignedText(getBorderString());
         }
 
         // nextBlocks
         for (int i = 0; i < NEXTBLOCK_COUNT; i++) {
-            int blockX = 1 + COLS + 1 + MARGIN_WIDTH / 2 - nextBlocks[i].getCenterX();
+            int blockX = COLS + BOARD_BORDER_THICKNESS * 2 + MARGIN_WIDTH / 2 - nextBlocks[i].getCenterX();
             int blockY = -~i * HOLD_BORDER_HEIGHT - 1 - nextBlocks[i].getMaxY();
             lazyPrinter.setColor(tetrominoColor[nextBlocks[i].getKind()], tetrominoColor[nextBlocks[i].getKind()]);
             for (auto [x, y] : nextBlocks[i].getShape()) drawGrid(x + blockX, y + blockY);
@@ -412,7 +413,7 @@ private:
         lazyPrinter.setColor(ConsoleColor::WHITE, ConsoleColor::WHITE);
         for (int i = 0; i <= ROWS + 1; i++) {
             for (int j = 0; j <= COLS + 1; j++) {
-                if (getTaxiDist(prevHardDropPosX, prevHardDropPosY, j, i) == shockwavePos) drawGrid(j + 1, i + 1);
+                if (getTaxiDist(prevHardDropPosX, prevHardDropPosY, j, i) == shockwavePos) drawGrid(j + BOARD_BORDER_THICKNESS, i + BOARD_BORDER_THICKNESS);
             }
         }
     }
@@ -424,35 +425,35 @@ private:
         lazyPrinter.setxyByPixel(LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT + GAMEINFO_MARGIN) * LEN);
         lazyPrinter.leftAlignedText("lines:");
 
-        lazyPrinter.setxyByPixel(LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT + GAMEINFO_MARGIN + 1) * LEN);
+        lazyPrinter.setxyByPixel(LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT + -~GAMEINFO_MARGIN) * LEN);
         lazyPrinter.leftAlignedText(to_string(brokenLines));
 
         // play time
-        lazyPrinter.setxyByPixel(LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT + 2 * GAMEINFO_MARGIN + 1) * LEN);
+        lazyPrinter.setxyByPixel(LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT + -~GAMEINFO_MARGIN + GAMEINFO_MARGIN) * LEN);
         lazyPrinter.leftAlignedText("time");
 
-        lazyPrinter.setxyByPixel(LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT + 2 * GAMEINFO_MARGIN + 2) * LEN);
+        lazyPrinter.setxyByPixel(LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT + -~GAMEINFO_MARGIN * 2) * LEN);
         lazyPrinter.leftAlignedText(to_string(playTime / 1000) + "." + to_string(playTime % 1000 * 0.001).substr(2, 2));
 
         // gameover, paused 여부
         if (gameover) {
             lazyPrinter.setColor(ConsoleColor::BLACK, ConsoleColor::WHITE);
-            lazyPrinter.setxyByPixel((-~MARGIN_WIDTH + COLS / 2) * LEN, (-~MARGIN_HEIGHT + ROWS / 2 - 1) * LEN);
+            lazyPrinter.setxyByPixel((MARGIN_WIDTH + BOARD_BORDER_THICKNESS + COLS / 2) * LEN, (MARGIN_HEIGHT + BOARD_BORDER_THICKNESS + ROWS / 2 - 1) * LEN);
             lazyPrinter.centerAlignedText("GAME OVER");
 
             lazyPrinter.setColor(ConsoleColor::WHITE, ConsoleColor::BLACK);
-            lazyPrinter.setxyByPixel((-~MARGIN_WIDTH + COLS / 2) * LEN, (-~MARGIN_HEIGHT + ROWS / 2) * LEN);
+            lazyPrinter.setxyByPixel((MARGIN_WIDTH + BOARD_BORDER_THICKNESS + COLS / 2) * LEN, (MARGIN_HEIGHT + BOARD_BORDER_THICKNESS + ROWS / 2) * LEN);
             lazyPrinter.centerAlignedText("press " + string(1, KEY_REPLAY_GAME) + " to replay");
         }
         else if (paused) {
-            lazyPrinter.setxyByPixel((-~MARGIN_WIDTH + COLS / 2) * LEN, (-~MARGIN_HEIGHT + ROWS / 2) * LEN);
+            lazyPrinter.setxyByPixel((MARGIN_WIDTH + BOARD_BORDER_THICKNESS + COLS / 2) * LEN, (MARGIN_HEIGHT + BOARD_BORDER_THICKNESS + ROWS / 2) * LEN);
             lazyPrinter.centerAlignedText("PAUSED");
         }
     }
 
     void drawManual() const {
         for (int i = 0; i < USER_CONTROL_KEYS.size(); i++) {
-            lazyPrinter.setxyByPixel(LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT + 2 * GAMEINFO_MARGIN + 2 + GAMEINFO_MARGIN + i) * LEN);
+            lazyPrinter.setxyByPixel(LEN, (MARGIN_HEIGHT + HOLD_BORDER_HEIGHT + -~GAMEINFO_MARGIN * 2 + GAMEINFO_MARGIN + i) * LEN);
             lazyPrinter.leftAlignedText(USER_CONTROL_KEYS[i]);
         }
     }
@@ -483,23 +484,27 @@ private:
 
 public:
     Game() : \
-        board(ROWS, vector<int>(COLS)), lazyPrinter((MARGIN_WIDTH + 1 + COLS + 1 + MARGIN_WIDTH) * LEN * PIXEL_WIDTH + 2 * BREAKROW_VIBRATION_LEN, (MARGIN_HEIGHT + 1 + ROWS + 1) * LEN * PIXEL_HEIGHT + HARDDROP_VIBRATION_LEN), \
+        board(ROWS, vector<int>(COLS)), lazyPrinter((MARGIN_WIDTH + 2 * BOARD_BORDER_THICKNESS + COLS + MARGIN_WIDTH) * LEN, 2 * BREAKROW_VIBRATION_LEN, (MARGIN_HEIGHT + 2 * BOARD_BORDER_THICKNESS + ROWS) * LEN, 1), \
         timer_drop(dropTime / sleepDuration, true), \
         timer_hardDropped(hardDropAnimationDuration / sleepDuration, false), \
         timer_breakRow(breakRowAnimationDuration / sleepDuration, true), \
         timer_rainbowBorder(rainbowAnimationDuration / sleepDuration, false) {
 
         // border
-        borderPos.reserve(ROWS + COLS + 2 << 1);
+        borderPos.reserve((ROWS + COLS - 4 << 1) * BOARD_BORDER_THICKNESS + 4 * BOARD_BORDER_THICKNESS * BOARD_BORDER_THICKNESS);
 
-        for (int j = 0; j <= COLS + 1; j++) {
-            borderPos.push_back({j, 0});
-            borderPos.push_back({j, ROWS + 1});
+        for (int x = 0; x < COLS + 2 * BOARD_BORDER_THICKNESS; x++) {
+            for (int y = 0; y < BOARD_BORDER_THICKNESS; y++) {
+                borderPos.push_back({x, y});
+                borderPos.push_back({x, ROWS + 2 * BOARD_BORDER_THICKNESS - 1 - y});
+            }
         }
 
-        for (int i = 1; i <= ROWS; i++) {
-            borderPos.push_back({0, i});
-            borderPos.push_back({COLS + 1, i});
+        for (int y = BOARD_BORDER_THICKNESS; y < ROWS + BOARD_BORDER_THICKNESS; y++) {
+            for (int x = 0; x < BOARD_BORDER_THICKNESS; x++) {
+                borderPos.push_back({x, y});
+                borderPos.push_back({COLS + 2 * BOARD_BORDER_THICKNESS - 1 - x, y});
+            }
         }
     }
 
