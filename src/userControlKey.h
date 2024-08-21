@@ -34,6 +34,7 @@ string convertKeyToString(char key) {
     return string(1, key);
 }
 
+// 게임 조작법 설명 ui에 사용. replay는 gameover문구 나올 때 같이 나와서 제외함.
 const vector<string> USER_CONTROL_KEYS = {
     "pause   : " + convertKeyToString(KEY_PAUSE_GAME),
     "moveL   : " + convertKeyToString(KEY_MOVE_LEFT),
@@ -46,6 +47,6 @@ const vector<string> USER_CONTROL_KEYS = {
     "thema   : " + convertKeyToString(KEY_CHANGE_THEMA)
 };
 
-constexpr int USER_CONTROL_KEY_COUNT = 9; // replay 제외
+constexpr int USER_CONTROL_KEY_COUNT = 9; // USER_CONTROL_KEYS.size() // user_control_keys를 constexpr로 선언할 수가 없어서 그냥 직접 숫자 세서 적어둠.
 
 #endif
