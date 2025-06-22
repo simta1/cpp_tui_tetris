@@ -2,7 +2,14 @@
 콘솔창에서 구현한 테트리스   
 지솦 SPC 제출용   
 윈도우11에서 만듦   
-main.cpp 컴파일해서 실행
+컴파일 후 main.exe 실행
+```
+make
+```
+make 설치가 안 되어 있다면
+```
+g++ src/main.cpp -O2 -std=c++17 -o main.exe
+```   
 
 ## 조작법
 src/userControlKey.h 에서 원하는 키로 수정 가능
